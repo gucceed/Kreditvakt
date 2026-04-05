@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Noto Serif", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-midnight: #001B3D;
+  --color-gold: #C5A059;
+  --color-gold-lite: #E5D5B5;
+  --color-slate-custom: #F8FAFC;
+  --color-border-hairline: rgba(197, 160, 89, 0.2);
+}
+
+@layer base {
+  body {
+    @apply bg-midnight text-white font-sans min-h-screen antialiased;
+  }
+}
+
+@layer components {
+  .glass-nav {
+    @apply bg-midnight/80 backdrop-blur-md border-b border-border-hairline;
+  }
+  
+  .executive-card {
+    @apply bg-white rounded-[4px] border border-slate-200 shadow-sm overflow-hidden;
+  }
+  
+  .hairline-border {
+    @apply border-[0.5px] border-border-hairline;
+  }
+}
