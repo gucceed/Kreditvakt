@@ -6,7 +6,7 @@
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/04804511-ae33-44f0-a959-9f9544c433fd
+View your app in AI Studio: https://kreditvakt-617780010256.us-west1.run.app
 
 ## Run Locally
 
