@@ -6,18 +6,37 @@ import { GoogleGenAI, Type } from "@google/genai";
 interface AnalysisResult {
   orgnr: string;
   company_name: string;
+  search_input_type: 'orgnr' | 'company_name';
   industry: string;
+  org_age_years: number;
+  registered_year: number;
   insolvency_score: number;
   verdict: string;
-  onset_days: number;
-  skuld_sek: number;
-  betalning_count: number;
   f_skatt_active: boolean;
-  median_days_to_konkurs: number;
+  // Source 1 — Skatteverket
+  skuld_sek: number;
   skatteverket_published: string;
-  skuld_published_date: string;
+  skuld_published_date: string | null;
+  // Source 2 — Kronofogden
+  betalning_count: number;
+  betalning_total_sek: number;
+  betalning_latest_date: string | null;
+  kronofogden_escalated: boolean;
+  // Source 3 — Bolagsverket ärenden
+  arende_ankommet_datum: string | null;
+  arende_kanal: string | null;
+  arende_total_avgift_sek: number | null;
+  arende_betalt_belopp_sek: number | null;
+  arende_obetald: boolean;
+  // Source 4 — Bolagsverket konkursregister
   konkurs_filed: boolean;
   konkurs_date: string | null;
+  // Timeline
+  onset_days: number | null;
+  median_days_to_konkurs: number | null;
+  // Summary
+  signal_count: number;
+  confidence: 'låg' | 'medel' | 'hög';
 }
 
 export const Analysis = () => {
@@ -29,56 +48,166 @@ export const Analysis = () => {
   const [approved, setApproved] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  const runAnalysis = useCallback(async (targetOrgnr?: string) => {
-    const input = targetOrgnr || orgnr;
-    const cleaned = input.replace(/[^0-9]/g, '');
-    
-    if (cleaned.length < 10) {
-      setError('Ange ett giltigt organisationsnummer (10 siffror, t.ex. 556012-3456)');
+  const runAnalysis = useCallback(async (targetQuery?: string) => {
+    const raw = (targetQuery ?? orgnr).trim();
+
+    if (!raw) {
+      setError('Ange ett organisationsnummer (t.ex. 556012-3456) eller ett företagsnamn.');
       return;
     }
 
-    const formattedOrgnr = cleaned.slice(0, 6) + '-' + cleaned.slice(6);
-    setOrgnr(formattedOrgnr);
+    // Format as orgnr if input is purely numeric
+    const digitsOnly = raw.replace(/[^0-9]/g, '');
+    const isOrgnr = /^[0-9\-\s]+$/.test(raw) && digitsOnly.length === 10;
+    const query = isOrgnr
+      ? digitsOnly.slice(0, 6) + '-' + digitsOnly.slice(6)
+      : raw;
+
+    setOrgnr(query);
     setLoading(true);
     setError(null);
     setResult(null);
     setApproved(false);
     setSlidePos(0);
 
+    const SYSTEM_INSTRUCTION = `Du är Kreditvakts signalmotor — ett professionellt insolvensanalysverktyg för svenska företag. Givet ett organisationsnummer ELLER ett företagsnamn, returnera ett realistiskt och välkalibrerat insolvensanalyssvar som JSON.
+
+INDATA-TOLKNING (gör detta först):
+- Om indata innehåller enbart siffror (10 st, med eller utan bindestreck): det är ett organisationsnummer — använd det direkt.
+- Om indata är text (ett företagsnamn, t.ex. "Byggfirman Svensson AB" eller "ikea"): generera ett realistiskt svenskt organisationsnummer för det bolaget och sätt company_name till det angivna namnet. Normalisera stavning och lägg till "AB" om ingen bolagsform anges.
+- Om indata matchar ett välkänt stort svenskt bolag (Ikea, Volvo, Ericsson, H&M, Skanska, Swedbank, SEB, Tele2, Vattenfall, SSAB etc.): sätt insolvency_score till 2–8 och generera konsekvent lågrisk-data.
+- Om indata är varken ett giltigt namn eller orgnr (tomt, bara specialtecken, ett enstaka slumpmässigt tecken): returnera {"error": "Kunde inte tolka indata. Ange ett organisationsnummer (t.ex. 556012-3456) eller ett företagsnamn (t.ex. Byggfirman Svensson AB)."}
+- Inkludera alltid fältet search_input_type: "orgnr" | "company_name" så frontend vet hur sökningen tolkades.
+
+REGLER FÖR SVARET:
+- Svara ENBART med ett JSON-objekt. Inga backticks, inga kommentarer, inget annat.
+- Variera resultaten meningsfullt baserat på orgnr eller namn — varje bolag ska kännas unikt.
+
+POÄNGDISTRIBUTION (insolvency_score 0–100):
+Distribuera realistiskt:
+  35% låg risk       → score 0–29   (stabila, välskötta bolag)
+  30% måttlig risk   → score 30–54  (varningstecken finns)
+  20% hög risk       → score 55–74  (aktiv signal från minst en källa)
+  10% kritisk risk   → score 75–89  (multipla signaler, hög konkursrisk)
+   5% akut/konkurs   → score 90–100 (konkursansökan trolig eller pågående)
+
+SIGNALKÄLLOR (fyra oberoende datakällor — alla måste representeras):
+
+1. SKATTEVERKET — restanslängden (skatteskuld)
+   skuld_sek: 0–2 500 000 (proportionellt mot score; 0 om score < 25)
+   skatteverket_published: "Ja — skuld publicerad på restanslängden" | "Nej — ej registrerad"
+   skuld_published_date: ÅÅÅÅ-MM-DD (3–18 månader bakåt om skuld finns, annars null)
+
+2. KRONOFOGDEN — betalningsförelägganden
+   betalning_count: 0–12 (0 om score < 20; stiger med score)
+   betalning_total_sek: 0–800 000 (summa öppna krav; 0 om betalning_count är 0)
+   betalning_latest_date: ÅÅÅÅ-MM-DD (senaste ärende om count > 0, annars null)
+   kronofogden_escalated: true om betalning_count >= 5 ELLER betalning_total_sek > 300 000
+
+3. BOLAGSVERKET — ärenden (ledande indikator, före registrering)
+   [Baserat på utökad ärendeendpoint med Ankommet datum — feb 2026]
+   arende_ankommet_datum: ÅÅÅÅ-MM-DD om ärende inkommit men ej registrerat (null om score < 60)
+   arende_kanal: "Digital inlämning" | "Papperspost" | null
+     (Papperspost = extra riskfaktor — bolag som skickar papper har ofta interna problem)
+   arende_total_avgift_sek: 0–25 000 om ärende pågår (annars null)
+   arende_betalt_belopp_sek: 0–arende_total_avgift_sek (skillnad = obetald avgift = friktionssignal)
+   arende_obetald: true om arende_total_avgift_sek > arende_betalt_belopp_sek (annars false/null)
+     [Obetald ärendeavgift = bolaget har ett ärende i rörelse men saknar likviditet att betala det]
+
+4. BOLAGSVERKET — konkursregister (bekräftande signal)
+   konkurs_filed: false om score < 90; true med 40% sannolikhet om score >= 90
+   konkurs_date: ÅÅÅÅ-MM-DD om konkurs_filed = true, annars null
+
+VARNINGSTID (lead time):
+   Kreditvakt varnar i median 9–10 månader före konkursansökan.
+   Ankommet datum-signalen (källa 3) bidrar med ytterligare dagar–veckor före registrering,
+   vilket är den primära mekanismen bakom den utökade varningshorisonten vs. kreditbyråer.
+   onset_days: uppskattade dagar tills likviditetsproblem eskalerar (50–450 om score > 30, annars null)
+   median_days_to_konkurs: 270–300 (aldrig lägre än 270 — reflekterar 9–10 månaders horisont)
+
+ÖVRIGA FÄLT:
+   orgnr: det organisationsnummer som användes eller genererades (format: XXXXXX-XXXX) — ALLTID med
+   company_name: företagets namn (från indata om namn angavs, annars genererat)
+   search_input_type: "orgnr" | "company_name"
+   industry: En av: Bygg & Entreprenad | Transport & Logistik | Handel & Detaljhandel | Tillverkning | IT & Konsult | Fastighet | Restaurang & Bespisning | Bemanning | Vård & Omsorg | Skog & Lantbruk
+   f_skatt_active: true om score < 70; false om score >= 70 med 65% sannolikhet
+   org_age_years: 1–40 (lägre ålder korrelerar med högre risk för nybolag)
+   registered_year: innevarande år minus org_age_years
+   verdict: En professionell mening på svenska som sammanfattar riskbilden — neutral och faktabaserad, inga dramatiska formuleringar
+   signal_count: antal aktiva varningssignaler (0–6; räkna: skuld_sek>0, betalning_count>0, kronofogden_escalated, !f_skatt_active, arende_obetald, konkurs_filed)
+   confidence: "låg" | "medel" | "hög" (0–1 signal = låg, 2–3 = medel, 4–6 = hög)
+
+INTERN KONSISTENS (obligatoriska regler — bryt aldrig dessa):
+- Om konkurs_filed = true → score MÅSTE vara >= 90
+- Om f_skatt_active = false → score MÅSTE vara >= 55
+- Om betalning_count >= 5 → score MÅSTE vara >= 45
+- Om skuld_sek > 500 000 → score MÅSTE vara >= 60
+- Om arende_obetald = true → score MÅSTE vara >= 50
+- Om arende_ankommet_datum finns (ej null) → score MÅSTE vara >= 60
+- Om score <= 20 → skuld_sek = 0, betalning_count = 0, konkurs_filed = false, f_skatt_active = true, arende_ankommet_datum = null, arende_obetald = false
+- signal_count MÅSTE matcha faktiskt antal aktiva signaler i svaret
+- confidence MÅSTE matcha signal_count enligt regeln ovan
+- median_days_to_konkurs MÅSTE vara 270–300 (aldrig lägre än 270)
+- orgnr MÅSTE alltid finnas i svaret oavsett inputtyp
+
+Returnera nu ett JSON-objekt för det bolag som anges av användaren.`;
+
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `Analysera organisationsnummer: ${formattedOrgnr}. Returnera JSON med fälten: orgnr, company_name, industry, insolvency_score, verdict, onset_days, skuld_sek, betalning_count, f_skatt_active, median_days_to_konkurs, skatteverket_published, skuld_published_date, konkurs_filed, konkurs_date`,
+        model: "gemini-2.5-flash-preview-05-20",
+        contents: query,
         config: {
-          systemInstruction: `Du är Kreditvakts signalmotor. Givet ett organisationsnummer, returnera ett realistiskt insolvensanalyssvar som JSON.`,
+          systemInstruction: SYSTEM_INSTRUCTION,
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
             properties: {
-              orgnr: { type: Type.STRING },
-              company_name: { type: Type.STRING },
-              industry: { type: Type.STRING },
-              insolvency_score: { type: Type.NUMBER },
-              verdict: { type: Type.STRING },
-              onset_days: { type: Type.NUMBER },
-              skuld_sek: { type: Type.NUMBER },
-              betalning_count: { type: Type.NUMBER },
-              f_skatt_active: { type: Type.BOOLEAN },
-              median_days_to_konkurs: { type: Type.NUMBER },
-              skatteverket_published: { type: Type.STRING },
-              skuld_published_date: { type: Type.STRING },
-              konkurs_filed: { type: Type.BOOLEAN },
-              konkurs_date: { type: Type.STRING, nullable: true },
+              orgnr:                    { type: Type.STRING },
+              company_name:             { type: Type.STRING },
+              search_input_type:        { type: Type.STRING },
+              industry:                 { type: Type.STRING },
+              org_age_years:            { type: Type.NUMBER },
+              registered_year:          { type: Type.NUMBER },
+              insolvency_score:         { type: Type.NUMBER },
+              verdict:                  { type: Type.STRING },
+              f_skatt_active:           { type: Type.BOOLEAN },
+              skuld_sek:                { type: Type.NUMBER },
+              skatteverket_published:   { type: Type.STRING },
+              skuld_published_date:     { type: Type.STRING, nullable: true },
+              betalning_count:          { type: Type.NUMBER },
+              betalning_total_sek:      { type: Type.NUMBER },
+              betalning_latest_date:    { type: Type.STRING, nullable: true },
+              kronofogden_escalated:    { type: Type.BOOLEAN },
+              arende_ankommet_datum:    { type: Type.STRING, nullable: true },
+              arende_kanal:             { type: Type.STRING, nullable: true },
+              arende_total_avgift_sek:  { type: Type.NUMBER, nullable: true },
+              arende_betalt_belopp_sek: { type: Type.NUMBER, nullable: true },
+              arende_obetald:           { type: Type.BOOLEAN },
+              konkurs_filed:            { type: Type.BOOLEAN },
+              konkurs_date:             { type: Type.STRING, nullable: true },
+              onset_days:               { type: Type.NUMBER, nullable: true },
+              median_days_to_konkurs:   { type: Type.NUMBER, nullable: true },
+              signal_count:             { type: Type.NUMBER },
+              confidence:               { type: Type.STRING },
             },
-            required: ["orgnr", "company_name", "industry", "insolvency_score", "verdict", "onset_days", "skuld_sek", "betalning_count", "f_skatt_active", "median_days_to_konkurs", "skatteverket_published", "skuld_published_date", "konkurs_filed", "konkurs_date"]
-          }
-        }
+            required: [
+              "orgnr", "company_name", "search_input_type", "industry",
+              "org_age_years", "registered_year", "insolvency_score", "verdict",
+              "f_skatt_active", "skuld_sek", "skatteverket_published",
+              "betalning_count", "betalning_total_sek", "kronofogden_escalated",
+              "arende_obetald", "konkurs_filed", "signal_count", "confidence",
+            ],
+          },
+        },
       });
 
       const data = JSON.parse(response.text || '{}');
-      setResult(data);
+      if (data.error) {
+        setError(data.error);
+      } else {
+        setResult(data);
+      }
     } catch (err) {
       console.error(err);
       setError('Signalmotorn kunde inte slutföra analysen. Vänligen kontrollera anslutningen och försök igen.');
@@ -139,19 +268,26 @@ export const Analysis = () => {
         <div>
           <span className="text-[10px] uppercase tracking-[0.2em] text-midnight/40 font-bold mb-4 block">Sök i realtidsregister</span>
           <h2 className="font-serif text-3xl text-midnight mb-6 leading-tight">
-            Ange organisationsnummer för <em className="not-italic text-gold">omedelbar granskning.</em>
+            Ange organisationsnummer eller företagsnamn för <em className="not-italic text-gold">omedelbar granskning.</em>
           </h2>
           <div className="relative mb-6">
-            <input 
+            <input
               type="text"
               value={orgnr}
               onChange={(e) => {
-                let v = e.target.value.replace(/[^0-9]/g, '');
-                if (v.length > 6) v = v.slice(0, 6) + '-' + v.slice(6, 10);
-                setOrgnr(v);
+                const v = e.target.value;
+                const digitsOnly = v.replace(/[^0-9]/g, '');
+                // Auto-format if the user is typing an orgnr (only digits/dash)
+                if (/^[0-9\-]*$/.test(v) && digitsOnly.length > 0) {
+                  let formatted = digitsOnly.slice(0, 10);
+                  if (formatted.length > 6) formatted = formatted.slice(0, 6) + '-' + formatted.slice(6);
+                  setOrgnr(formatted);
+                } else {
+                  setOrgnr(v);
+                }
               }}
               onKeyDown={(e) => e.key === 'Enter' && runAnalysis()}
-              placeholder="Organisationsnummer (t.ex. 556012-3456)"
+              placeholder="Organisationsnummer eller företagsnamn"
               className="w-full bg-transparent border-b border-midnight/10 py-4 text-2xl text-midnight placeholder:text-midnight/10 outline-none focus:border-gold transition-colors font-light"
             />
             <button 
@@ -164,13 +300,13 @@ export const Analysis = () => {
           </div>
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-[9px] uppercase tracking-widest text-midnight/30 mr-2">Snabbsök:</span>
-            {['556036-0793', '556460-4187', '559021-4389'].map(num => (
-              <button 
-                key={num}
-                onClick={() => runAnalysis(num)}
+            {['556036-0793', '556460-4187', '559021-4389', 'Ikea', 'Skanska'].map(q => (
+              <button
+                key={q}
+                onClick={() => runAnalysis(q)}
                 className="text-[9px] uppercase tracking-widest text-midnight/40 hover:text-gold transition-colors border border-midnight/5 px-3 py-1 rounded-[2px]"
               >
-                {num}
+                {q}
               </button>
             ))}
           </div>
