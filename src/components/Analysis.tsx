@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, ChevronRight, Lock, Check, Activity } from 'lucide-react';
-import { GoogleGenAI, Type } from "@google/genai";
 
 interface AnalysisResult {
   orgnr: string;
@@ -70,147 +69,25 @@ export const Analysis = () => {
     setApproved(false);
     setSlidePos(0);
 
-    const SYSTEM_INSTRUCTION = `Du är Kreditvakts signalmotor — ett professionellt insolvensanalysverktyg för svenska företag. Givet ett organisationsnummer ELLER ett företagsnamn, returnera ett realistiskt och välkalibrerat insolvensanalyssvar som JSON.
-
-INDATA-TOLKNING (gör detta först):
-- Om indata innehåller enbart siffror (10 st, med eller utan bindestreck): det är ett organisationsnummer — använd det direkt.
-- Om indata är text (ett företagsnamn, t.ex. "Byggfirman Svensson AB" eller "ikea"): generera ett realistiskt svenskt organisationsnummer för det bolaget och sätt company_name till det angivna namnet. Normalisera stavning och lägg till "AB" om ingen bolagsform anges.
-- Om indata matchar ett välkänt stort svenskt bolag (Ikea, Volvo, Ericsson, H&M, Skanska, Swedbank, SEB, Tele2, Vattenfall, SSAB etc.): sätt insolvency_score till 2–8 och generera konsekvent lågrisk-data.
-- Om indata är varken ett giltigt namn eller orgnr (tomt, bara specialtecken, ett enstaka slumpmässigt tecken): returnera {"error": "Kunde inte tolka indata. Ange ett organisationsnummer (t.ex. 556012-3456) eller ett företagsnamn (t.ex. Byggfirman Svensson AB)."}
-- Inkludera alltid fältet search_input_type: "orgnr" | "company_name" så frontend vet hur sökningen tolkades.
-
-REGLER FÖR SVARET:
-- Svara ENBART med ett JSON-objekt. Inga backticks, inga kommentarer, inget annat.
-- Variera resultaten meningsfullt baserat på orgnr eller namn — varje bolag ska kännas unikt.
-
-POÄNGDISTRIBUTION (insolvency_score 0–100):
-Distribuera realistiskt:
-  35% låg risk       → score 0–29   (stabila, välskötta bolag)
-  30% måttlig risk   → score 30–54  (varningstecken finns)
-  20% hög risk       → score 55–74  (aktiv signal från minst en källa)
-  10% kritisk risk   → score 75–89  (multipla signaler, hög konkursrisk)
-   5% akut/konkurs   → score 90–100 (konkursansökan trolig eller pågående)
-
-SIGNALKÄLLOR (fyra oberoende datakällor — alla måste representeras):
-
-1. SKATTEVERKET — restanslängden (skatteskuld)
-   skuld_sek: 0–2 500 000 (proportionellt mot score; 0 om score < 25)
-   skatteverket_published: "Ja — skuld publicerad på restanslängden" | "Nej — ej registrerad"
-   skuld_published_date: ÅÅÅÅ-MM-DD (3–18 månader bakåt om skuld finns, annars null)
-
-2. KRONOFOGDEN — betalningsförelägganden
-   betalning_count: 0–12 (0 om score < 20; stiger med score)
-   betalning_total_sek: 0–800 000 (summa öppna krav; 0 om betalning_count är 0)
-   betalning_latest_date: ÅÅÅÅ-MM-DD (senaste ärende om count > 0, annars null)
-   kronofogden_escalated: true om betalning_count >= 5 ELLER betalning_total_sek > 300 000
-
-3. BOLAGSVERKET — ärenden (ledande indikator, före registrering)
-   [Baserat på utökad ärendeendpoint med Ankommet datum — feb 2026]
-   arende_ankommet_datum: ÅÅÅÅ-MM-DD om ärende inkommit men ej registrerat (null om score < 60)
-   arende_kanal: "Digital inlämning" | "Papperspost" | null
-     (Papperspost = extra riskfaktor — bolag som skickar papper har ofta interna problem)
-   arende_total_avgift_sek: 0–25 000 om ärende pågår (annars null)
-   arende_betalt_belopp_sek: 0–arende_total_avgift_sek (skillnad = obetald avgift = friktionssignal)
-   arende_obetald: true om arende_total_avgift_sek > arende_betalt_belopp_sek (annars false/null)
-     [Obetald ärendeavgift = bolaget har ett ärende i rörelse men saknar likviditet att betala det]
-
-4. BOLAGSVERKET — konkursregister (bekräftande signal)
-   konkurs_filed: false om score < 90; true med 40% sannolikhet om score >= 90
-   konkurs_date: ÅÅÅÅ-MM-DD om konkurs_filed = true, annars null
-
-VARNINGSTID (lead time):
-   Kreditvakt varnar i median 9–10 månader före konkursansökan.
-   Ankommet datum-signalen (källa 3) bidrar med ytterligare dagar–veckor före registrering,
-   vilket är den primära mekanismen bakom den utökade varningshorisonten vs. kreditbyråer.
-   onset_days: uppskattade dagar tills likviditetsproblem eskalerar (50–450 om score > 30, annars null)
-   median_days_to_konkurs: 270–300 (aldrig lägre än 270 — reflekterar 9–10 månaders horisont)
-
-ÖVRIGA FÄLT:
-   orgnr: det organisationsnummer som användes eller genererades (format: XXXXXX-XXXX) — ALLTID med
-   company_name: företagets namn (från indata om namn angavs, annars genererat)
-   search_input_type: "orgnr" | "company_name"
-   industry: En av: Bygg & Entreprenad | Transport & Logistik | Handel & Detaljhandel | Tillverkning | IT & Konsult | Fastighet | Restaurang & Bespisning | Bemanning | Vård & Omsorg | Skog & Lantbruk
-   f_skatt_active: true om score < 70; false om score >= 70 med 65% sannolikhet
-   org_age_years: 1–40 (lägre ålder korrelerar med högre risk för nybolag)
-   registered_year: innevarande år minus org_age_years
-   verdict: En professionell mening på svenska som sammanfattar riskbilden — neutral och faktabaserad, inga dramatiska formuleringar
-   signal_count: antal aktiva varningssignaler (0–6; räkna: skuld_sek>0, betalning_count>0, kronofogden_escalated, !f_skatt_active, arende_obetald, konkurs_filed)
-   confidence: "låg" | "medel" | "hög" (0–1 signal = låg, 2–3 = medel, 4–6 = hög)
-
-INTERN KONSISTENS (obligatoriska regler — bryt aldrig dessa):
-- Om konkurs_filed = true → score MÅSTE vara >= 90
-- Om f_skatt_active = false → score MÅSTE vara >= 55
-- Om betalning_count >= 5 → score MÅSTE vara >= 45
-- Om skuld_sek > 500 000 → score MÅSTE vara >= 60
-- Om arende_obetald = true → score MÅSTE vara >= 50
-- Om arende_ankommet_datum finns (ej null) → score MÅSTE vara >= 60
-- Om score <= 20 → skuld_sek = 0, betalning_count = 0, konkurs_filed = false, f_skatt_active = true, arende_ankommet_datum = null, arende_obetald = false
-- signal_count MÅSTE matcha faktiskt antal aktiva signaler i svaret
-- confidence MÅSTE matcha signal_count enligt regeln ovan
-- median_days_to_konkurs MÅSTE vara 270–300 (aldrig lägre än 270)
-- orgnr MÅSTE alltid finnas i svaret oavsett inputtyp
-
-Returnera nu ett JSON-objekt för det bolag som anges av användaren.`;
-
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash-preview-05-20",
-        contents: query,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              orgnr:                    { type: Type.STRING },
-              company_name:             { type: Type.STRING },
-              search_input_type:        { type: Type.STRING },
-              industry:                 { type: Type.STRING },
-              org_age_years:            { type: Type.NUMBER },
-              registered_year:          { type: Type.NUMBER },
-              insolvency_score:         { type: Type.NUMBER },
-              verdict:                  { type: Type.STRING },
-              f_skatt_active:           { type: Type.BOOLEAN },
-              skuld_sek:                { type: Type.NUMBER },
-              skatteverket_published:   { type: Type.STRING },
-              skuld_published_date:     { type: Type.STRING, nullable: true },
-              betalning_count:          { type: Type.NUMBER },
-              betalning_total_sek:      { type: Type.NUMBER },
-              betalning_latest_date:    { type: Type.STRING, nullable: true },
-              kronofogden_escalated:    { type: Type.BOOLEAN },
-              arende_ankommet_datum:    { type: Type.STRING, nullable: true },
-              arende_kanal:             { type: Type.STRING, nullable: true },
-              arende_total_avgift_sek:  { type: Type.NUMBER, nullable: true },
-              arende_betalt_belopp_sek: { type: Type.NUMBER, nullable: true },
-              arende_obetald:           { type: Type.BOOLEAN },
-              konkurs_filed:            { type: Type.BOOLEAN },
-              konkurs_date:             { type: Type.STRING, nullable: true },
-              onset_days:               { type: Type.NUMBER, nullable: true },
-              median_days_to_konkurs:   { type: Type.NUMBER, nullable: true },
-              signal_count:             { type: Type.NUMBER },
-              confidence:               { type: Type.STRING },
-            },
-            required: [
-              "orgnr", "company_name", "search_input_type", "industry",
-              "org_age_years", "registered_year", "insolvency_score", "verdict",
-              "f_skatt_active", "skuld_sek", "skatteverket_published",
-              "betalning_count", "betalning_total_sek", "kronofogden_escalated",
-              "arende_obetald", "konkurs_filed", "signal_count", "confidence",
-            ],
-          },
-        },
+      const resp = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
       });
 
-      const data = JSON.parse(response.text || '{}');
-      if (data.error) {
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        setError(data.error ?? 'Tillfälligt fel. Försök igen om en stund.');
+      } else if (data.error) {
         setError(data.error);
       } else {
         setResult(data);
       }
     } catch (err) {
       console.error(err);
-      setError('Signalmotorn kunde inte slutföra analysen. Vänligen kontrollera anslutningen och försök igen.');
+      setError('Tillfälligt fel. Försök igen om en stund.');
     } finally {
       setLoading(false);
     }
