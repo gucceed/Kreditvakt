@@ -36,6 +36,10 @@ interface AnalysisResult {
   // Summary
   signal_count: number;
   confidence: 'låg' | 'medel' | 'hög';
+  // Display score (0–20 scale). Falls back to insolvency_score conversion if absent.
+  display_score?: number;
+  band?: number;
+  band_label?: string;
 }
 
 export const Analysis = () => {
@@ -229,27 +233,38 @@ export const Analysis = () => {
 
             <div className="bg-white/5 hairline-border rounded-[4px] overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-12 p-10 items-center border-b border-gold/10">
+                {(() => {
+                  const score = result.display_score ?? Math.round(result.insolvency_score / 5);
+                  const label = result.band_label ?? (
+                    score <= 4 ? 'Stabil' :
+                    score <= 8 ? 'Bevaka' :
+                    score <= 12 ? 'Förhöjd risk' :
+                    score <= 16 ? 'Hög risk' : 'Kritisk'
+                  );
+                  const textColor =
+                    score <= 4 ? 'text-emerald-500' :
+                    score <= 8 ? 'text-yellow-500' :
+                    score <= 12 ? 'text-orange-500' :
+                    score <= 16 ? 'text-orange-600' : 'text-red-500';
+                  const dotColor =
+                    score <= 4 ? 'bg-emerald-500' :
+                    score <= 8 ? 'bg-yellow-500' :
+                    score <= 12 ? 'bg-orange-500' :
+                    score <= 16 ? 'bg-orange-600' : 'bg-red-500';
+                  return (
+                    <>
                 <div className="text-center min-w-[140px]">
-                  <div className={`font-serif text-8xl font-bold leading-none tracking-tighter ${
-                    result.insolvency_score >= 90 ? 'text-red-500' :
-                    result.insolvency_score >= 70 ? 'text-orange-500' :
-                    result.insolvency_score >= 40 ? 'text-yellow-500' : 'text-emerald-500'
-                  }`}>
-                    {result.insolvency_score}
+                  <div className={`font-serif text-8xl font-bold leading-none tracking-tighter ${textColor}`}>
+                    {score}
                   </div>
-                  <span className="text-[9px] uppercase tracking-[0.3em] text-gold-lite/40 mt-4 block">Insolvensbetyg</span>
+                  <span className="text-[9px] uppercase tracking-[0.3em] text-gold-lite/40 mt-2 block">av 20</span>
+                  <span className="text-[9px] uppercase tracking-[0.3em] text-gold-lite/40 block">Insolvensbetyg</span>
                 </div>
                 <div>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-3 h-3 rounded-full ${
-                      result.insolvency_score >= 90 ? 'bg-red-500' :
-                      result.insolvency_score >= 70 ? 'bg-orange-500' :
-                      result.insolvency_score >= 40 ? 'bg-yellow-500' : 'bg-emerald-500'
-                    }`} />
+                    <div className={`w-3 h-3 rounded-full ${dotColor}`} />
                     <span className="text-[10px] uppercase tracking-[0.2em] text-gold font-bold">
-                      {result.insolvency_score >= 90 ? 'KRITISK RISK' :
-                       result.insolvency_score >= 70 ? 'HÖG RISK' :
-                       result.insolvency_score >= 40 ? 'MEDEL RISK' : 'LÅG RISK'}
+                      {label.toUpperCase()}
                     </span>
                   </div>
                   <h3 className="font-serif text-3xl text-white mb-2">{result.company_name}</h3>
@@ -260,6 +275,9 @@ export const Analysis = () => {
                     </p>
                   </div>
                 </div>
+                    </>
+                  );
+                })()}
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gold/10">

@@ -1,18 +1,75 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Shield, Zap, Globe, Lock, ArrowRight, Calculator, CheckCircle2, Database, TrendingUp } from 'lucide-react';
+import { Shield, Lock, CheckCircle2, Database, TrendingUp, Calculator, Mail } from 'lucide-react';
+
+const TIERS = [
+  {
+    badge: 'Kom igång gratis',
+    name: 'Free',
+    price: '0 kr',
+    period: '/månad',
+    note: 'Ingen kreditkort krävs',
+    description: 'För dig som vill prova Kreditvakt. Bolagsstatuskontroller utan kostnad.',
+    features: ['50 uppslag/månad', 'Bolagsstatus'],
+    cta: 'Skapa konto',
+    href: 'https://norric-mcp-production.up.railway.app/signup/free',
+    highlighted: false,
+  },
+  {
+    badge: 'Grundläggande',
+    name: 'Silver',
+    price: '499 kr',
+    period: '/månad',
+    note: 'Faktureras månadsvis',
+    description: 'Kreditriskvärdering och automatiska varningar för din leverantörsbas.',
+    features: ['500 uppslag/månad', 'Kreditriskvärdering', 'Riskvarningar'],
+    cta: 'Välj Silver',
+    href: 'https://norric-mcp-production.up.railway.app/billing/checkout?tier=silver',
+    highlighted: false,
+  },
+  {
+    badge: 'Mest valda',
+    name: 'Guld',
+    price: '1 499 kr',
+    period: '/månad',
+    note: 'Faktureras månadsvis',
+    description: 'Fullständig skuldöversikt med fordringsägardetaljer för kreditavdelningar.',
+    features: ['Obegränsade uppslag', 'Komplett skuldanalys', 'Fordringsägardetaljer', 'CSV-export'],
+    cta: 'Välj Guld',
+    href: 'https://norric-mcp-production.up.railway.app/billing/checkout?tier=guld',
+    highlighted: true,
+  },
+  {
+    badge: 'Avancerat',
+    name: 'Premium',
+    price: '4 999 kr',
+    period: '/månad',
+    note: 'Faktureras månadsvis',
+    description: 'Allt i Guld plus dedikerad support, SLA-garanti och full API-åtkomst.',
+    features: ['Obegränsade uppslag', 'Allt i Guld', 'Dedikerad support', 'SLA-garanti', 'Full API-åtkomst'],
+    cta: 'Välj Premium',
+    href: 'https://norric-mcp-production.up.railway.app/billing/checkout?tier=premium',
+    highlighted: false,
+  },
+  {
+    badge: 'Enterprise',
+    name: 'Enterprise',
+    price: 'Kontakta oss',
+    period: '',
+    note: 'Skräddarsydd prissättning',
+    description: 'Databaslicens, anpassade leveransformat och dedikerat SLA för banker och kreditförsäkringsbolag.',
+    features: ['Obegränsade uppslag', 'Fullständig databaslicens', 'Anpassade integrationer', 'Dedikerat SLA'],
+    cta: 'Begär offert',
+    href: 'mailto:hej@norric.io',
+    highlighted: false,
+  },
+];
 
 export const Pricing = () => {
-  const monitoringTiers = React.useMemo(() => [
-    { size: 'Upp till 200 MSEK portfölj', price: '60 000 kr/år' },
-    { size: 'Upp till 500 MSEK portfölj', price: '100 000 kr/år' },
-    { size: 'Upp till 1 BSEK portfölj', price: '150 000 kr/år' },
-  ], []);
-
   return (
     <div className="py-12 space-y-24">
       {/* ROI Anchor Section */}
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto p-12 bg-white/5 hairline-border rounded-[4px] relative overflow-hidden group"
@@ -20,7 +77,7 @@ export const Pricing = () => {
         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
           <Calculator className="w-32 h-32 text-gold" />
         </div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-gold/10 flex items-center justify-center rounded-[2px]">
@@ -55,7 +112,7 @@ export const Pricing = () => {
                 <div className="h-px bg-gold/20 w-12 mx-auto mb-4" />
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-gold-lite/40">Investering</span>
-                  <span className="text-white">100 000 kr/år</span>
+                  <span className="text-white">4 999 kr/mån</span>
                 </div>
                 <div className="mt-6 text-2xl font-serif text-white">
                   ROI: <span className="text-gold">18×</span>
@@ -67,103 +124,80 @@ export const Pricing = () => {
       </motion.section>
 
       {/* Pricing Tiers */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-        
-        {/* PER UPPSLAG */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="p-10 bg-white/5 border border-gold/10 rounded-[4px] flex flex-col justify-between hover:border-gold/30 transition-all will-change-[opacity,transform]"
-        >
-          <div>
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <span className="bg-gold/10 text-gold text-[8px] uppercase tracking-widest px-2 py-1 rounded-full font-bold mb-3 block w-fit">
-                  Kom igång direkt
-                </span>
-                <h3 className="font-serif text-2xl text-white mb-2">Per Uppslag</h3>
-              </div>
-            </div>
-            <div className="mb-8">
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-serif font-bold text-white">5 kr</span>
-                <span className="text-xs text-gold-lite/40">per organisationsnummer</span>
-              </div>
-              <p className="text-[10px] text-gold-lite/30 mt-2 italic">Ingen månadsavgift, ingen bindningstid</p>
-            </div>
-            <p className="text-xs text-white/70 leading-relaxed mb-8">
-              För inköpsteam, HR och juridik som behöver utföra enstaka, strategiska kontroller vid behov. Faktureras månadsvis baserat på faktisk användning.
-            </p>
-          </div>
-          <button className="w-full py-4 bg-gold text-midnight text-[11px] uppercase tracking-[0.2em] font-bold rounded-[2px] hover:bg-gold-lite transition-all">
-            Starta nu
-          </button>
-        </motion.div>
-
-        {/* ÖVERVAKNING */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="p-10 bg-gold border border-gold rounded-[4px] flex flex-col justify-between shadow-[0_0_50px_rgba(197,160,89,0.15)] relative z-10 will-change-[opacity,transform]"
-        >
-          <div>
-            <div className="flex justify-between items-start mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5 items-stretch">
+        {TIERS.map((tier, i) => (
+          tier.highlighted ? (
+            <motion.div
+              key={tier.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07 }}
+              className="p-8 bg-gold border border-gold rounded-[4px] flex flex-col justify-between shadow-[0_0_50px_rgba(197,160,89,0.15)] relative z-10 will-change-[opacity,transform]"
+            >
               <div>
                 <span className="bg-midnight text-gold text-[8px] uppercase tracking-widest px-2 py-1 rounded-full font-bold mb-3 block w-fit">
-                  Mest valda
+                  {tier.badge}
                 </span>
-                <h3 className="font-serif text-2xl text-midnight mb-2">Övervakning</h3>
-              </div>
-            </div>
-            
-            <div className="space-y-px bg-midnight/10 rounded-[2px] overflow-hidden mb-8">
-              {monitoringTiers.map((tier, i) => (
-                <div key={i} className="flex justify-between p-4 bg-midnight/5 text-[11px]">
-                  <span className="text-midnight/60">{tier.size}</span>
-                  <span className="text-midnight font-bold">{tier.price}</span>
+                <h3 className="font-serif text-2xl text-midnight mb-4">{tier.name}</h3>
+                <div className="mb-1">
+                  <span className="text-3xl font-serif font-bold text-midnight">{tier.price}</span>
+                  {tier.period && <span className="text-xs text-midnight/60 ml-1">{tier.period}</span>}
                 </div>
-              ))}
-            </div>
-
-            <p className="text-xs text-midnight/80 leading-relaxed mb-8">
-              För kreditavdelningar och riskhanterare. Inkluderar realtidsalerter via webhook, obegränsad portföljövervakning, daglig rapport, CSV-export och full API-åtkomst. Årsvis fakturering.
-            </p>
-          </div>
-          <button className="w-full py-4 bg-midnight text-gold text-[11px] uppercase tracking-[0.2em] font-bold rounded-[2px] hover:bg-midnight/90 transition-all">
-            Boka demo
-          </button>
-        </motion.div>
-
-        {/* ENTERPRISE DATAFEED */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="p-10 bg-white/5 border border-gold/10 rounded-[4px] flex flex-col justify-between hover:border-gold/30 transition-all will-change-[opacity,transform]"
-        >
-          <div>
-            <div className="flex justify-between items-start mb-8">
+                <p className="text-[10px] text-midnight/50 italic mb-6">{tier.note}</p>
+                <p className="text-xs text-midnight/80 leading-relaxed mb-6">{tier.description}</p>
+                <ul className="space-y-2 mb-8">
+                  {tier.features.map(f => (
+                    <li key={f} className="text-[11px] text-midnight/70 flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-midnight/40 flex-shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <a
+                href={tier.href}
+                className="w-full py-4 bg-midnight text-gold text-[11px] uppercase tracking-[0.2em] font-bold rounded-[2px] hover:bg-midnight/90 transition-all text-center block"
+              >
+                {tier.cta}
+              </a>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={tier.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.07 }}
+              className="p-8 bg-white/5 border border-gold/10 rounded-[4px] flex flex-col justify-between hover:border-gold/30 transition-all will-change-[opacity,transform]"
+            >
               <div>
-                <div className="w-8 h-8 bg-gold/10 flex items-center justify-center rounded-[2px] mb-4">
-                  <Database className="w-4 h-4 text-gold" />
+                <span className="bg-gold/10 text-gold text-[8px] uppercase tracking-widest px-2 py-1 rounded-full font-bold mb-3 block w-fit">
+                  {tier.badge}
+                </span>
+                <h3 className="font-serif text-2xl text-white mb-4">{tier.name}</h3>
+                <div className="mb-1">
+                  <span className="text-3xl font-serif font-bold text-white">{tier.price}</span>
+                  {tier.period && <span className="text-xs text-gold-lite/40 ml-1">{tier.period}</span>}
                 </div>
-                <h3 className="font-serif text-2xl text-white mb-2">Enterprise Datafeed</h3>
+                <p className="text-[10px] text-gold-lite/30 italic mb-6">{tier.note}</p>
+                <p className="text-xs text-white/70 leading-relaxed mb-6">{tier.description}</p>
+                <ul className="space-y-2 mb-8">
+                  {tier.features.map(f => (
+                    <li key={f} className="text-[11px] text-gold-lite/50 flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-gold/40 flex-shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-            <div className="mb-8">
-              <span className="text-2xl font-serif font-bold text-white">Från 300 000 kr/år</span>
-            </div>
-            <p className="text-xs text-white/70 leading-relaxed mb-8">
-              För kreditförsäkringsbolag, banker och internationella investerare som kräver full databaslicens, anpassade leveransformat och dedikerat SLA-stöd.
-            </p>
-          </div>
-          <button className="w-full py-4 border border-gold/40 text-gold text-[11px] uppercase tracking-[0.2em] font-bold rounded-[2px] hover:bg-gold/10 transition-all">
-            Begär offert
-          </button>
-        </motion.div>
-
+              <a
+                href={tier.href}
+                className="w-full py-4 border border-gold/40 text-gold text-[11px] uppercase tracking-[0.2em] font-bold rounded-[2px] hover:bg-gold/10 transition-all text-center block"
+              >
+                {tier.cta}
+              </a>
+            </motion.div>
+          )
+        ))}
       </div>
 
       {/* Trust Signals Footer */}
