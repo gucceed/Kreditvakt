@@ -22,7 +22,7 @@ const TIERS = [
     description: 'Kreditriskvärdering och automatiska varningar.',
     features: ['500 uppslag/månad', 'Kreditriskvärdering', 'Riskvarningar'],
     cta: 'Välj Silver →',
-    href: 'https://norric-mcp-production.up.railway.app/billing/checkout?tier=silver',
+    href: 'https://norric-mcp-production.up.railway.app/checkout?tier=standard&billing=monthly',
     highlighted: false,
   },
   {
@@ -34,7 +34,7 @@ const TIERS = [
     description: 'Komplett skuldöversikt med fordringsägardetaljer.',
     features: ['Obegränsade uppslag', 'Komplett skuldanalys', 'Fordringsägardetaljer', 'CSV-export'],
     cta: 'Välj Guld →',
-    href: 'https://norric-mcp-production.up.railway.app/billing/checkout?tier=guld',
+    href: 'https://norric-mcp-production.up.railway.app/checkout?tier=standard&billing=annual',
     highlighted: true,
   },
   {
@@ -46,7 +46,7 @@ const TIERS = [
     description: 'Guld plus dedikerad support, SLA och full API-åtkomst.',
     features: ['Obegränsade uppslag', 'Allt i Guld', 'Dedikerad support', 'SLA-garanti', 'Full API-åtkomst'],
     cta: 'Välj Premium →',
-    href: 'https://norric-mcp-production.up.railway.app/billing/checkout?tier=premium',
+    href: 'https://norric-mcp-production.up.railway.app/checkout?tier=compliance&billing=annual',
     highlighted: false,
   },
   {
