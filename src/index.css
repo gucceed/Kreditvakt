@@ -1,33 +1,122 @@
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "Noto Serif", serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  
+  --font-serif: "Cormorant Garamond", "Georgia", serif;
+  --font-mono: "DM Mono", "Courier New", monospace;
+  --font-sans: "DM Mono", ui-monospace, monospace;
+
   --color-midnight: #001B3D;
   --color-gold: #C5A059;
   --color-gold-lite: #E5D5B5;
-  --color-slate-custom: #F8FAFC;
   --color-border-hairline: rgba(197, 160, 89, 0.2);
 }
 
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  --bg:           #001B3D;
+  --bg-card:      rgba(255, 255, 255, 0.04);
+  --bg-card-h:    rgba(255, 255, 255, 0.07);
+  --text-primary: #FFFFFF;
+  --text-second:  rgba(229, 213, 181, 0.6);
+  --text-muted:   rgba(229, 213, 181, 0.28);
+  --border:       rgba(197, 160, 89, 0.15);
+  --border-h:     rgba(197, 160, 89, 0.35);
+  --nav-bg:       rgba(0, 27, 61, 0.88);
+  --gold:         #C5A059;
+  --gold-dim:     rgba(197, 160, 89, 0.1);
+  --risk-stable:    #10B981;
+  --risk-watch:     #EAB308;
+  --risk-elevated:  #F97316;
+  --risk-high:      #EA580C;
+  --risk-critical:  #EF4444;
+}
+
+.light {
+  --bg:           #F8F7F4;
+  --bg-card:      rgba(0, 0, 0, 0.035);
+  --bg-card-h:    rgba(0, 0, 0, 0.065);
+  --text-primary: #001B3D;
+  --text-second:  rgba(0, 27, 61, 0.55);
+  --text-muted:   rgba(0, 27, 61, 0.32);
+  --border:       rgba(0, 27, 61, 0.1);
+  --border-h:     rgba(197, 160, 89, 0.5);
+  --nav-bg:       rgba(248, 247, 244, 0.93);
+  --gold:         #B8923E;
+  --gold-dim:     rgba(184, 146, 62, 0.08);
+}
+
+/* ── Base ──────────────────────────────────────────────────── */
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   body {
-    @apply bg-midnight text-white font-sans min-h-screen antialiased;
+    background-color: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
   }
 }
 
+/* ── Components ────────────────────────────────────────────── */
 @layer components {
-  .glass-nav {
-    @apply bg-midnight/80 backdrop-blur-md border-b border-border-hairline;
+  .hairline-border {
+    border: 0.5px solid var(--border);
   }
-  
+
+  .card {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: 4px;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .card:hover {
+    border-color: var(--border-h);
+    background: var(--bg-card-h);
+  }
+
+  .nav-glass {
+    background: var(--nav-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 0.5px solid var(--border);
+    transition: background 0.3s ease;
+  }
+
+  .risk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+
+  /* Tailwind-compatible glass-nav alias kept for legacy components */
+  .glass-nav {
+    background: var(--nav-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  /* executive-card kept for any legacy component usage */
   .executive-card {
     @apply bg-white rounded-[4px] border border-slate-200 shadow-sm overflow-hidden;
-  }
-  
-  .hairline-border {
-    @apply border-[0.5px] border-border-hairline;
   }
 }
