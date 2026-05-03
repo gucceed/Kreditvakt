@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  Shield,
-  Sun,
-  Moon,
-  Menu,
-  X,
-  ChevronRight,
-  TrendingUp,
-  AlertTriangle,
-  Database,
-  ArrowRight,
-} from 'lucide-react';
 import { Pricing } from './components/Pricing';
 
-/* ── Static data ───────────────────────────────────────────── */
+/* ── Inline mark — no icon library ────────────────────────── */
+const ShieldMark = ({ size = 16, style }: { size?: number; style?: React.CSSProperties }) => (
+  <svg width={size} height={size} viewBox="0 0 16 20" fill="none" aria-hidden="true" style={style}>
+    <path d="M8 0L0 3.636V9.09c0 5.319 3.413 10.288 8 11.546C12.587 19.378 16 14.41 16 9.09V3.636L8 0z" fill="currentColor" />
+  </svg>
+);
 
+/* ── Static data ───────────────────────────────────────────── */
 const SCORE_BANDS = [
   { range: '0 – 4',   label: 'Stabil',       color: '#10B981', pct: '< 1%',   desc: 'Inga signifikanta skuldindikationer' },
   { range: '5 – 8',   label: 'Bevaka',        color: '#EAB308', pct: '2–5%',   desc: 'Måttliga skuldsignaler — bevaka aktivt' },
@@ -25,51 +19,49 @@ const SCORE_BANDS = [
 ];
 
 const DEMO_COMPANIES = [
-  { name: 'Exemplet Bygg AB',   org_nr: '5566778899', score: 3,  label: 'Stabil',       color: '#10B981' },
-  { name: 'Nordisk Handel AB',  org_nr: '5567889900', score: 10, label: 'Förhöjd risk', color: '#F97316' },
-  { name: 'Fastighets AB Alfa', org_nr: '5568990011', score: 16, label: 'Hög risk',     color: '#EA580C' },
+  { name: 'Exemplet Bygg AB',   org_nr: '556 677-8899', score: 3,  label: 'Stabil',       color: '#10B981' },
+  { name: 'Nordisk Handel AB',  org_nr: '556 788-9900', score: 10, label: 'Förhöjd risk', color: '#F97316' },
+  { name: 'Fastighets AB Alfa', org_nr: '556 899-0011', score: 16, label: 'Hög risk',     color: '#EA580C' },
 ];
 
 const PAIN_POINTS = [
   {
-    Icon: TrendingUp,
+    num: '01',
     title: 'Leverantörsrisker',
-    body: 'Leverantörskonkurser skapar produktionsstopp och nödanskaffning. Kreditvakt ger 9 månaders förvarning — tid att säkra alternativ.',
+    body: 'Leverantörskonkurser skapar produktionsstopp. Kreditvakt ger 9 månaders förvarning — tid att säkra alternativ.',
   },
   {
-    Icon: AlertTriangle,
+    num: '02',
     title: 'Kundkrediter',
-    body: 'Kreditbeslut på ofullständig information leder till kundförluster. Vår kreditvärdering är kalibrerad mot 20 år av konkursdata.',
+    body: 'Kreditbeslut på ofullständig information leder till kundförluster. Modellen är kalibrerad mot 20 år av konkursdata.',
   },
   {
-    Icon: Database,
+    num: '03',
     title: 'Portföljövervakning',
-    body: 'Manuell uppföljning av hundratals motparter är omöjlig. Kreditvakt skannar din portfölj kontinuerligt och eskalerar automatiskt.',
+    body: 'Manuell uppföljning av hundratals motparter är inte skalbart. Kreditvakt skannar din portfölj och eskalerar automatiskt.',
   },
 ];
 
-/* ── Sub-components ────────────────────────────────────────── */
-
+/* ── Score bar ─────────────────────────────────────────────── */
 function ScoreBar({ score, color }: { score: number; color: string }) {
   return (
-    <div className="h-[3px] w-full rounded-full" style={{ background: 'var(--border)' }}>
+    <div className="h-px w-full" style={{ background: 'var(--border)' }}>
       <motion.div
-        className="h-full rounded-full"
+        className="h-full"
         style={{ background: color }}
         initial={{ width: 0 }}
         animate={{ width: `${(score / 20) * 100}%` }}
-        transition={{ duration: 1, ease: 'easeOut', delay: 0.25 }}
+        transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
       />
     </div>
   );
 }
 
-/* ── Main ──────────────────────────────────────────────────── */
-
+/* ── App ───────────────────────────────────────────────────── */
 export default function App() {
-  const [light, setLight] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [demoIdx, setDemoIdx] = useState(0);
+  const [light, setLight]   = useState(false);
+  const [menuOpen, setMenu] = useState(false);
+  const [demoIdx, setDemo]  = useState(0);
 
   const demo = DEMO_COMPANIES[demoIdx];
 
@@ -79,46 +71,61 @@ export default function App() {
       style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)', transition: 'background 0.3s ease' }}
     >
 
-      {/* ═══ NAV ══════════════════════════════════════════════ */}
-      <nav className="nav-glass fixed top-0 w-full z-50 px-6 md:px-10 py-[18px] flex items-center justify-between">
+      {/* ── Nav ─────────────────────────────────────────────── */}
+      <nav className="nav-glass fixed top-0 w-full z-50 px-6 md:px-12 py-5 flex items-center justify-between">
+
         <a href="#" className="flex items-center gap-3">
-          <div className="w-8 h-8 flex items-center justify-center rounded-[2px]" style={{ background: 'var(--gold)' }}>
-            <Shield className="w-4 h-4" style={{ color: 'var(--bg)' }} />
+          {/* gold 1 / 6 */}
+          <div className="w-7 h-7 flex items-center justify-center" style={{ background: 'var(--gold)', borderRadius: '2px' }}>
+            <ShieldMark size={13} style={{ color: 'var(--bg)' }} />
           </div>
           <span className="font-serif text-[17px] font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
             Kreditvakt
           </span>
         </a>
 
-        <div className="hidden md:flex items-center gap-8 text-[10px] uppercase tracking-[0.22em]" style={{ color: 'var(--text-second)' }}>
-          <a href="#produkt" className="transition-colors hover:opacity-100" style={{ opacity: 0.8 }}>Produkt</a>
-          <a href="#priser"  className="transition-colors hover:opacity-100" style={{ opacity: 0.8 }}>Priser</a>
-          <a href="https://norric.io/developer-docs.html" className="transition-colors hover:opacity-100" style={{ opacity: 0.8 }}>API</a>
+        <div
+          className="hidden md:flex items-center gap-10 text-[10px] uppercase tracking-[0.22em]"
+          style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+        >
+          <a href="#produkt" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Produkt</a>
+          <a href="#priser"  className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Priser</a>
+          <a href="https://norric.io/developer-docs.html" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>API</a>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => setLight(l => !l)}
             aria-label="Byt tema"
-            className="p-2 rounded-[2px] transition-opacity hover:opacity-70"
-            style={{ color: 'var(--text-second)' }}
+            className="transition-opacity hover:opacity-60"
+            style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: 1 }}
           >
-            {light ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            {light ? '◑' : '◐'}
           </button>
+          {/* gold 2 / 6 */}
           <a
             href="#priser"
-            className="hidden md:flex items-center gap-1.5 text-[10px] uppercase tracking-[0.25em] font-bold px-5 py-2.5 rounded-[2px] transition-opacity hover:opacity-80"
-            style={{ background: 'var(--gold)', color: 'var(--bg)' }}
+            className="hidden md:block text-[10px] uppercase tracking-[0.25em] font-bold px-5 py-2.5 transition-opacity hover:opacity-80"
+            style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
           >
             Kom igång
           </a>
+          {/* hamburger — CSS only */}
           <button
-            className="md:hidden p-2"
-            style={{ color: 'var(--text-second)' }}
-            onClick={() => setMenuOpen(o => !o)}
+            className="md:hidden"
+            onClick={() => setMenu(o => !o)}
             aria-label="Meny"
+            style={{ color: 'var(--text-muted)' }}
           >
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {menuOpen ? (
+              <span style={{ fontSize: '20px', fontFamily: 'var(--font-mono)', lineHeight: 1 }}>×</span>
+            ) : (
+              <div className="flex flex-col gap-[5px]">
+                <div className="w-5 h-px" style={{ background: 'var(--text-muted)' }} />
+                <div className="w-5 h-px" style={{ background: 'var(--text-muted)' }} />
+                <div className="w-3.5 h-px" style={{ background: 'var(--text-muted)' }} />
+              </div>
+            )}
           </button>
         </div>
       </nav>
@@ -127,11 +134,11 @@ export default function App() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="nav-glass fixed top-[61px] inset-x-0 z-40 px-8 py-6 flex flex-col gap-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="nav-glass fixed top-[64px] inset-x-0 z-40 px-8 py-8 flex flex-col gap-6"
           >
             {[
               { href: '#produkt', label: 'Produkt' },
@@ -141,67 +148,64 @@ export default function App() {
               <a
                 key={href}
                 href={href}
-                onClick={() => setMenuOpen(false)}
+                onClick={() => setMenu(false)}
                 className="text-[11px] uppercase tracking-[0.22em]"
-                style={{ color: 'var(--text-second)' }}
+                style={{ color: 'var(--text-second)', fontFamily: 'var(--font-mono)' }}
               >
                 {label}
               </a>
             ))}
-            <a
-              href="#priser"
-              onClick={() => setMenuOpen(false)}
-              className="text-[10px] uppercase tracking-[0.25em] font-bold px-5 py-3 rounded-[2px] text-center mt-2"
-              style={{ background: 'var(--gold)', color: 'var(--bg)' }}
-            >
-              Kom igång
-            </a>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <main className="pb-32 md:pb-0">
+      <main className="pb-28 md:pb-0">
 
-        {/* ═══ HERO ═════════════════════════════════════════════ */}
-        <section className="pt-40 pb-24 md:pt-52 md:pb-32 px-6 md:px-10 max-w-5xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75 }}>
-            <div
-              className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] px-4 py-2 rounded-full mb-10"
-              style={{ border: '0.5px solid var(--gold)', color: 'var(--gold)' }}
+        {/* ── Hero ────────────────────────────────────────────── */}
+        <section className="pt-44 pb-32 md:pt-56 md:pb-40 px-6 md:px-12 max-w-5xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <p
+              className="text-[10px] uppercase tracking-[0.35em] mb-12"
+              style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
             >
-              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--gold)' }} />
               Kreditriskbevakning · Bankstandard
-            </div>
+            </p>
 
             <h1
-              className="font-serif font-bold leading-[1.04] tracking-tight mb-8"
-              style={{ fontSize: 'clamp(2.6rem, 6vw, 5rem)', color: 'var(--text-primary)' }}
+              className="font-serif font-bold leading-[1.02] mb-10"
+              style={{ fontSize: 'clamp(2.8rem, 7vw, 5.5rem)', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}
             >
               Se insolvensen<br />
+              {/* gold 3 / 6 */}
               <span style={{ color: 'var(--gold)' }}>9 månader</span> innan<br />
               konkursansökan
             </h1>
 
             <p
-              className="leading-relaxed max-w-2xl mx-auto mb-12"
-              style={{ fontSize: '13px', color: 'var(--text-second)', fontFamily: 'var(--font-mono)' }}
+              className="max-w-lg mx-auto mb-14"
+              style={{ fontSize: '13px', color: 'var(--text-second)', fontFamily: 'var(--font-mono)', lineHeight: '1.9' }}
             >
-              Kreditvakt analyserar skuldregisterdata i realtid och genererar ett insolvensbetyg 0–20
-              för varje bolag i din portfölj. Validerat mot svenska konkursdata 2003–2023.
+              Skuldregisterdata i realtid. Insolvensbetyg 0–20 per bolag.
+              Validerat mot svenska konkursdata 2003–2023.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {/* gold 4 / 6 */}
               <a
                 href="https://norric-mcp-production.up.railway.app/signup/free"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[2px] text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-80"
-                style={{ background: 'var(--gold)', color: 'var(--bg)' }}
+                className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-80"
+                style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
               >
-                Prova gratis <ChevronRight className="w-4 h-4" />
+                Prova gratis — 10 uppslag
               </a>
               <a
                 href="mailto:hej@norric.io?subject=Demo%20request"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[2px] text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-80"
-                style={{ border: '0.5px solid var(--gold)', color: 'var(--gold)' }}
+                className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-70"
+                style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
               >
                 Boka demo
               </a>
@@ -209,64 +213,78 @@ export default function App() {
           </motion.div>
         </section>
 
-        {/* ═══ TRUST BAR ════════════════════════════════════════ */}
-        <section className="px-6 md:px-10 max-w-5xl mx-auto" style={{ borderTop: '0.5px solid var(--border)' }}>
+        {/* ── Trust bar ───────────────────────────────────────── */}
+        <section className="px-6 md:px-12 max-w-5xl mx-auto" style={{ borderTop: '0.5px solid var(--border)' }}>
           <div className="grid grid-cols-1 sm:grid-cols-3">
             {[
-              { stat: '9 mån', label: 'Medianvarning före konkursansökan' },
-              { stat: '80%',   label: 'Detekterbara konkurser i förväg'   },
-              { stat: '6×',    label: 'Bättre träffsäkerhet än kreditbyråer' },
+              { stat: '9 mån', label: 'Medianvarning — konkursansökan'      },
+              { stat: '80%',   label: 'Detekterbara konkurser i förväg'      },
+              { stat: '6×',    label: 'Träffsäkerhet vs. kreditbyråer'       },
             ].map((item, i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 + i * 0.1 }}
-                className="py-10"
+                className="py-12"
                 style={{
-                  paddingLeft:   i > 0 ? '2rem'  : 0,
-                  paddingRight:  i < 2 ? '2rem'  : 0,
-                  borderRight:   i < 2 ? '0.5px solid var(--border)' : 'none',
+                  paddingLeft:  i > 0 ? '2.5rem' : 0,
+                  paddingRight: i < 2 ? '2.5rem' : 0,
+                  borderRight:  i < 2 ? '0.5px solid var(--border)' : 'none',
                 }}
               >
-                <div className="font-serif text-[2rem] font-bold leading-none mb-2" style={{ color: 'var(--text-primary)' }}>{item.stat}</div>
-                <div className="text-[10px] uppercase tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>{item.label}</div>
-              </motion.div>
+                <div
+                  className="font-serif font-bold leading-none mb-2"
+                  style={{ fontSize: '2.2rem', color: 'var(--text-primary)' }}
+                >
+                  {item.stat}
+                </div>
+                <div
+                  className="text-[10px] uppercase tracking-[0.2em]"
+                  style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+                >
+                  {item.label}
+                </div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* ═══ DEMO SCORE CARD ══════════════════════════════════ */}
-        <section id="produkt" className="py-28 px-6 md:px-10 max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        {/* ── Demo score card ─────────────────────────────────── */}
+        <section id="produkt" className="py-32 px-6 md:px-12 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-20 items-start">
 
-            {/* Left copy */}
-            <div className="lg:pt-4">
-              <p className="text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: 'var(--gold)', fontFamily: 'var(--font-mono)' }}>
-                Live-demo
+            <div>
+              <p
+                className="text-[10px] uppercase tracking-[0.35em] mb-8"
+                style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+              >
+                Demonstrationsvy
               </p>
               <h2
-                className="font-serif font-bold leading-tight mb-6"
-                style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', color: 'var(--text-primary)' }}
+                className="font-serif font-bold leading-tight mb-8"
+                style={{ fontSize: 'clamp(1.9rem, 4vw, 3rem)', color: 'var(--text-primary)' }}
               >
                 Insolvensbetyg<br />i realtid
               </h2>
-              <p className="leading-relaxed mb-8" style={{ fontSize: '12px', color: 'var(--text-second)', fontFamily: 'var(--font-mono)' }}>
-                Varje bolag i din portfölj tilldelas ett betyg 0–20 baserat på
-                Kronofogdens skuldregister. Skalan är kalibrerad mot 20 år av
-                svenska konkursutfall.
+              <p
+                className="leading-relaxed mb-10"
+                style={{ fontSize: '12px', color: 'var(--text-second)', fontFamily: 'var(--font-mono)', lineHeight: '1.9' }}
+              >
+                Varje bolag tilldelas ett betyg 0–20 baserat på Kronofogdens
+                skuldregister. Kalibrerat mot 20 år av konkursutfall.
               </p>
-              <div className="flex flex-wrap gap-3">
+              {/* Company tabs — no gold active state */}
+              <div className="flex flex-wrap gap-2">
                 {DEMO_COMPANIES.map((c, i) => (
                   <button
                     key={i}
-                    onClick={() => setDemoIdx(i)}
-                    className="text-[10px] uppercase tracking-[0.15em] px-4 py-2.5 rounded-[2px] transition-all"
+                    onClick={() => setDemo(i)}
+                    className="text-[10px] uppercase tracking-[0.12em] px-4 py-2.5 transition-all"
                     style={{
                       fontFamily: 'var(--font-mono)',
-                      border:  `0.5px solid ${i === demoIdx ? 'var(--gold)' : 'var(--border)'}`,
-                      color:   i === demoIdx ? 'var(--gold)' : 'var(--text-second)',
-                      background: i === demoIdx ? 'var(--gold-dim)' : 'transparent',
+                      border: '0.5px solid var(--border)',
+                      borderRadius: '2px',
+                      color:       i === demoIdx ? 'var(--text-primary)' : 'var(--text-muted)',
+                      borderColor: i === demoIdx ? 'var(--border-h)' : 'var(--border)',
+                      opacity:     i === demoIdx ? 1 : 0.55,
                     }}
                   >
                     {c.name}
@@ -275,53 +293,59 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right — score card */}
+            {/* Terminal card */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={demoIdx}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
-                transition={{ duration: 0.3 }}
-                className="card p-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  background: 'var(--bg-card)',
+                  border: '0.5px solid var(--border)',
+                  borderRadius: '2px',
+                  padding: '2.5rem',
+                }}
               >
-                <div className="flex items-start justify-between mb-8">
+                <div className="flex items-start justify-between mb-10">
                   <div>
-                    <div className="font-serif text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>{demo.name}</div>
-                    <div className="text-[10px] tracking-[0.2em]" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    <div className="font-serif text-xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                      {demo.name}
+                    </div>
+                    <div
+                      className="text-[10px] tracking-[0.15em]"
+                      style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+                    >
                       org.nr {demo.org_nr}
                     </div>
                   </div>
-                  <span
-                    className="risk-badge"
+                  <div
+                    className="text-[9px] uppercase tracking-[0.2em] px-3 py-1.5"
                     style={{
-                      background: `${demo.color}18`,
-                      color: demo.color,
+                      borderRadius: '2px',
                       border: `0.5px solid ${demo.color}55`,
+                      color: demo.color,
+                      fontFamily: 'var(--font-mono)',
                     }}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: demo.color }} />
                     {demo.label}
-                  </span>
+                  </div>
                 </div>
 
-                {/* Score display */}
+                {/* Score — financial terminal: no animation, just data */}
                 <div
-                  className="text-center py-8 mb-6"
+                  className="text-center py-10 mb-8"
                   style={{ borderTop: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)' }}
                 >
-                  <motion.div
-                    key={`score-${demoIdx}`}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className="font-serif font-bold leading-none mb-2"
-                    style={{ fontSize: '80px', color: demo.color }}
+                  <div
+                    className="font-serif font-bold leading-none mb-3"
+                    style={{ fontSize: '88px', color: demo.color, fontVariantNumeric: 'tabular-nums' }}
                   >
                     {demo.score}
-                  </motion.div>
+                  </div>
                   <div
-                    className="text-[10px] uppercase tracking-[0.3em]"
+                    className="text-[10px] uppercase tracking-[0.35em]"
                     style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
                   >
                     av 20 · Insolvensbetyg
@@ -330,13 +354,13 @@ export default function App() {
 
                 <ScoreBar score={demo.score} color={demo.color} />
 
-                <div className="mt-6 grid grid-cols-2 gap-4 text-[10px]" style={{ fontFamily: 'var(--font-mono)' }}>
+                <div className="mt-8 grid grid-cols-2 gap-6" style={{ fontFamily: 'var(--font-mono)', fontSize: '10px' }}>
                   <div>
-                    <div className="mb-1 uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Skuldpoäng</div>
-                    <div style={{ color: 'var(--text-primary)' }}>{demo.score * 47 + 12} tkr registrerat</div>
+                    <div className="uppercase tracking-[0.15em] mb-1.5" style={{ color: 'var(--text-muted)' }}>Skulder registrerade</div>
+                    <div style={{ color: 'var(--text-primary)' }}>{(demo.score * 47 + 12).toLocaleString('sv-SE')} tkr</div>
                   </div>
                   <div>
-                    <div className="mb-1 uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Datakälla</div>
+                    <div className="uppercase tracking-[0.15em] mb-1.5" style={{ color: 'var(--text-muted)' }}>Datakälla</div>
                     <div style={{ color: 'var(--text-primary)' }}>Kronofogden · idag</div>
                   </div>
                 </div>
@@ -345,48 +369,55 @@ export default function App() {
           </div>
         </section>
 
-        {/* ═══ WHAT IT SOLVES ═══════════════════════════════════ */}
-        <section className="py-20 px-6 md:px-10 max-w-5xl mx-auto" style={{ borderTop: '0.5px solid var(--border)' }}>
-          <div className="text-center mb-16">
-            <p className="text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: 'var(--gold)', fontFamily: 'var(--font-mono)' }}>
-              Varför Kreditvakt
+        {/* ── What it solves ──────────────────────────────────── */}
+        <section className="py-24 px-6 md:px-12 max-w-5xl mx-auto" style={{ borderTop: '0.5px solid var(--border)' }}>
+          <div className="mb-16">
+            <p
+              className="text-[10px] uppercase tracking-[0.35em] mb-8"
+              style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+            >
+              Riskscenarier
             </p>
             <h2
-              className="font-serif font-bold"
-              style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: 'var(--text-primary)' }}
+              className="font-serif font-bold max-w-lg"
+              style={{ fontSize: 'clamp(1.9rem, 4vw, 2.8rem)', color: 'var(--text-primary)' }}
             >
               Riskerna du inte ser<br />är de farligaste
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {PAIN_POINTS.map(({ Icon, title, body }, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="card p-8"
-              >
+
+          {/* Columns — no cards, no icons */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10" style={{ borderTop: '0.5px solid var(--border)' }}>
+            {PAIN_POINTS.map(({ num, title, body }) => (
+              <div key={num} className="pt-8">
                 <div
-                  className="w-10 h-10 flex items-center justify-center rounded-[2px] mb-6"
-                  style={{ background: 'var(--gold-dim)', border: '0.5px solid var(--border)' }}
+                  className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6"
+                  style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
                 >
-                  <Icon className="w-5 h-5" style={{ color: 'var(--gold)' }} />
+                  {num}
                 </div>
-                <h3 className="font-serif text-xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>{title}</h3>
-                <p className="leading-relaxed" style={{ fontSize: '12px', color: 'var(--text-second)', fontFamily: 'var(--font-mono)' }}>
+                <h3
+                  className="font-serif text-xl font-bold mb-4"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  {title}
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-second)', fontFamily: 'var(--font-mono)', lineHeight: '1.9' }}>
                   {body}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* ═══ SCORING TABLE ════════════════════════════════════ */}
-        <section className="py-20 px-6 md:px-10 max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: 'var(--gold)', fontFamily: 'var(--font-mono)' }}>
-              Betygsskala
+        {/* ── Scoring table ───────────────────────────────────── */}
+        <section className="py-24 px-6 md:px-12 max-w-4xl mx-auto">
+          <div className="mb-12">
+            <p
+              className="text-[10px] uppercase tracking-[0.35em] mb-8"
+              style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+            >
+              Betygsskala 0–20
             </p>
             <h2
               className="font-serif font-bold"
@@ -395,59 +426,61 @@ export default function App() {
               Vad betyder betyget?
             </h2>
           </div>
-          <div className="card overflow-hidden">
+
+          <div style={{ border: '0.5px solid var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
             {SCORE_BANDS.map((band, i) => (
               <div
                 key={i}
-                className="grid items-center py-5 px-6 transition-colors"
                 style={{
-                  gridTemplateColumns: '90px 120px 1fr 70px',
-                  gap: '1rem',
+                  padding: '1.25rem 1.5rem',
                   borderBottom: i < SCORE_BANDS.length - 1 ? '0.5px solid var(--border)' : 'none',
                 }}
               >
-                <div
-                  className="text-sm font-bold tabular-nums"
-                  style={{ color: band.color, fontFamily: 'var(--font-mono)' }}
-                >
-                  {band.range}
+                {/* Top row: range | label | pct */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-4">
+                    <span
+                      style={{ fontSize: '12px', fontWeight: 700, color: band.color, fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}
+                    >
+                      {band.range}
+                    </span>
+                    <span
+                      style={{ fontSize: '10px', color: band.color, fontFamily: 'var(--font-mono)', letterSpacing: '0.12em', borderLeft: `2px solid ${band.color}`, paddingLeft: '10px' }}
+                    >
+                      {band.label}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                    {band.pct}
+                  </span>
                 </div>
-                <span
-                  className="risk-badge"
-                  style={{ background: `${band.color}18`, color: band.color }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: band.color }} />
-                  {band.label}
-                </span>
+                {/* Description — full width, below */}
                 <p style={{ fontSize: '11px', color: 'var(--text-second)', fontFamily: 'var(--font-mono)' }}>
                   {band.desc}
                 </p>
-                <div
-                  className="text-right font-bold"
-                  style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
-                >
-                  {band.pct}
-                </div>
               </div>
             ))}
           </div>
           <p
-            className="text-center mt-4"
+            className="mt-4"
             style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
           >
-            * 12-månaders konkursfrekvens per band · validerat mot data 2003–2023
+            Konkursfrekvens per band · Validerat 2003–2023
           </p>
         </section>
 
-        {/* ═══ PRICING ══════════════════════════════════════════ */}
-        <section id="priser" className="py-20 px-6 md:px-10 max-w-7xl mx-auto" style={{ borderTop: '0.5px solid var(--border)' }}>
-          <div className="text-center mb-16">
-            <p className="text-[10px] uppercase tracking-[0.3em] mb-5" style={{ color: 'var(--gold)', fontFamily: 'var(--font-mono)' }}>
+        {/* ── Pricing ─────────────────────────────────────────── */}
+        <section id="priser" className="py-24 px-6 md:px-12 max-w-7xl mx-auto" style={{ borderTop: '0.5px solid var(--border)' }}>
+          <div className="mb-16">
+            <p
+              className="text-[10px] uppercase tracking-[0.35em] mb-8"
+              style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+            >
               Prissättning
             </p>
             <h2
               className="font-serif font-bold"
-              style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'var(--text-primary)' }}
+              style={{ fontSize: 'clamp(1.9rem, 4vw, 3rem)', color: 'var(--text-primary)' }}
             >
               Välj din plan
             </h2>
@@ -455,38 +488,42 @@ export default function App() {
           <Pricing />
         </section>
 
-        {/* ═══ FOOTER ═══════════════════════════════════════════ */}
+        {/* ── Footer ──────────────────────────────────────────── */}
         <footer
-          className="px-6 md:px-10 py-16 max-w-5xl mx-auto"
+          className="px-6 md:px-12 py-16 max-w-5xl mx-auto"
           style={{ borderTop: '0.5px solid var(--border)' }}
         >
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-8">
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 flex items-center justify-center rounded-[2px]" style={{ background: 'var(--gold)' }}>
-                <Shield className="w-4 h-4" style={{ color: 'var(--bg)' }} />
+              {/* gold 5 / 6 */}
+              <div
+                className="w-7 h-7 flex items-center justify-center"
+                style={{ background: 'var(--gold)', borderRadius: '2px' }}
+              >
+                <ShieldMark size={13} style={{ color: 'var(--bg)' }} />
               </div>
               <span className="font-serif text-base font-bold" style={{ color: 'var(--text-primary)' }}>Kreditvakt</span>
             </div>
             <nav
-              className="flex flex-wrap gap-6 text-[10px] uppercase tracking-[0.2em]"
+              className="flex flex-wrap gap-8 text-[10px] uppercase tracking-[0.2em]"
               style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
             >
-              <a href="https://norric.io/developer-docs.html" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>API-dokumentation</a>
-              <a href="mailto:hej@norric.io"                 className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Kontakt</a>
-              <a href="https://norric.io"                    className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Norric AB</a>
+              <a href="https://norric.io/developer-docs.html" style={{ opacity: 0.6 }} className="transition-opacity hover:opacity-100">API</a>
+              <a href="mailto:hej@norric.io"                 style={{ opacity: 0.6 }} className="transition-opacity hover:opacity-100">hej@norric.io</a>
+              <a href="https://norric.io"                    style={{ opacity: 0.6 }} className="transition-opacity hover:opacity-100">Norric AB</a>
             </nav>
             <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-              © 2025 Norric AB · Malmö, Sverige
+              © 2025 Norric AB · Malmö
             </p>
           </div>
-          <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', lineHeight: 1.8 }}>
-            Kreditvakt analyserar offentliga administrativa data. Ingen personuppgiftsbehandling.
+          <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', lineHeight: '1.9' }}>
+            Analyserar offentliga administrativa data. Ingen personuppgiftsbehandling.
             GDPR-kompatibelt. Alla signaler är offentliga enligt svensk lag.
           </p>
         </footer>
       </main>
 
-      {/* ═══ MOBILE PORTFOLIO BANNER ══════════════════════════ */}
+      {/* ── Mobile sticky banner ────────────────────────────── */}
       <div
         className="md:hidden fixed bottom-0 inset-x-0 z-40 px-6 py-4 flex items-center justify-between"
         style={{
@@ -497,22 +534,20 @@ export default function App() {
         }}
       >
         <div>
-          <div
-            className="text-[9px] uppercase tracking-[0.2em] mb-0.5"
-            style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
-          >
+          <div style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '4px' }}>
             Prova gratis
           </div>
-          <div className="font-serif text-[14px] font-bold" style={{ color: 'var(--text-primary)' }}>
+          <div className="font-serif font-bold" style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
             10 uppslag · Ingen kreditkort
           </div>
         </div>
+        {/* gold 6 / 6 */}
         <a
           href="https://norric-mcp-production.up.railway.app/signup/free"
-          className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-bold px-5 py-3 rounded-[2px] transition-opacity hover:opacity-80"
-          style={{ background: 'var(--gold)', color: 'var(--bg)', fontFamily: 'var(--font-mono)' }}
+          className="text-[10px] uppercase tracking-[0.2em] font-bold px-5 py-3 transition-opacity hover:opacity-80"
+          style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
         >
-          Starta <ArrowRight className="w-3 h-3" />
+          Starta →
         </a>
       </div>
     </div>
