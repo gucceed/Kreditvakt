@@ -10,7 +10,7 @@ const TIERS = [
     period: '/månad',
     note: 'Ingen kreditkort krävs',
     description: 'För dig som vill prova Kreditvakt. Bolagsstatuskontroller utan kostnad.',
-    features: ['50 uppslag/månad', 'Bolagsstatus'],
+    features: ['10 uppslag/månad', 'Bolagsstatus', '1 orgnr · delad kvot'],
     cta: 'Skapa konto',
     href: 'https://norric-mcp-production.up.railway.app/signup/free',
     highlighted: false,
