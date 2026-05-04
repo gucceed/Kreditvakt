@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Pricing } from './components/Pricing';
 import { SignupModal } from './components/SignupModal';
+import { useNavigate } from 'react-router-dom';
 
 /* ── Inline mark — no icon library ────────────────────────── */
 const ShieldMark = ({ size = 16, style }: { size?: number; style?: React.CSSProperties }) => (
@@ -64,6 +65,7 @@ export default function App() {
   const [menuOpen, setMenu]   = useState(false);
   const [demoIdx, setDemo]    = useState(0);
   const [showSignup, setSignup] = useState(false);
+  const navigate = useNavigate();
 
   const demo = DEMO_COMPANIES[demoIdx];
 
@@ -115,7 +117,7 @@ export default function App() {
         >
           <a href="#produkt" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Produkt</a>
           <a href="#priser"  className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Priser</a>
-          <a href="https://norric.io/developer-docs.html" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>API</a>
+          <a href="/docs" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>API</a>
         </div>
 
         <div className="flex items-center gap-4">
@@ -129,7 +131,7 @@ export default function App() {
           </button>
           {/* gold 2 / 6 */}
           <a
-            href="#priser"
+            href="/signup"
             className="hidden md:block text-[10px] uppercase tracking-[0.25em] font-bold px-5 py-2.5 transition-opacity hover:opacity-80"
             style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
           >
@@ -168,7 +170,7 @@ export default function App() {
             {[
               { href: '#produkt', label: 'Produkt' },
               { href: '#priser',  label: 'Priser'  },
-              { href: 'https://norric.io/developer-docs.html', label: 'API' },
+              { href: '/docs', label: 'API' },
             ].map(({ href, label }) => (
               <a
                 key={href}
@@ -220,13 +222,13 @@ export default function App() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {/* gold 4 / 6 */}
-              <button
-                onClick={() => setSignup(true)}
+              <a
+                href="/signup"
                 className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-80"
                 style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
               >
                 Prova gratis — 10 uppslag
-              </button>
+              </a>
               <a
                 href="mailto:hej@norric.io?subject=Demo%20request"
                 className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-70"
@@ -510,7 +512,7 @@ export default function App() {
               Välj din plan
             </h2>
           </div>
-          <Pricing onSignup={() => setSignup(true)} />
+          <Pricing onSignup={() => navigate('/signup')} />
         </section>
 
         {/* ── Footer ──────────────────────────────────────────── */}
@@ -533,7 +535,7 @@ export default function App() {
               className="flex flex-wrap gap-8 text-[10px] uppercase tracking-[0.2em]"
               style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
             >
-              <a href="https://norric.io/developer-docs.html" style={{ opacity: 0.6 }} className="transition-opacity hover:opacity-100">API</a>
+              <a href="/docs" style={{ opacity: 0.6 }} className="transition-opacity hover:opacity-100">API</a>
               <a href="mailto:hej@norric.io"                 style={{ opacity: 0.6 }} className="transition-opacity hover:opacity-100">hej@norric.io</a>
               <a href="https://norric.io"                    style={{ opacity: 0.6 }} className="transition-opacity hover:opacity-100">Norric AB</a>
             </nav>
@@ -567,13 +569,13 @@ export default function App() {
           </div>
         </div>
         {/* gold 6 / 6 */}
-        <button
-          onClick={() => setSignup(true)}
+        <a
+          href="/signup"
           className="text-[10px] uppercase tracking-[0.2em] font-bold px-5 py-3 transition-opacity hover:opacity-80"
           style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
         >
           Starta →
-        </button>
+        </a>
       </div>
     </div>
   );

@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Norric MCP — Developer Docs & Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090b;
+    --s1: #111113;
+    --s2: #18181b;
+    --s3: #1f1f23;
+    --border: #27272a;
+    --border2: #3f3f46;
+    --text: #fafafa;
+    --muted: #71717a;
+    --dim: #3f3f46;
+    --green: #4ade80;
+    --green-bg: #052e16;
+    --green-b: #14532d;
+    --blue: #60a5fa;
+    --blue-bg: #0c1a3a;
+    --blue-b: #1e3a6e;
+    --amber: #fbbf24;
+    --amber-bg: #1c1300;
+    --amber-b: #3d2800;
+    --purple: #c084fc;
+    --purple-bg: #180d2e;
+    --purple-b: #3b1a6b;
+    --teal: #2dd4bf;
+    --teal-bg: #042f2e;
+    --teal-b: #0d5e5a;
+    --red: #f87171;
+    --red-bg: #1c0a0a;
+    --red-b: #3d1212;
+    --code-bg: #0d0d0f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Geist Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--s1);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    padding: 24px 0;
+  }
+
+  .sidebar-logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .sidebar-logo-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .sidebar-logo-name span { font-style: italic; color: var(--muted); }
+
+  .sidebar-logo-tag {
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .nav-section {
+    padding: 0 20px;
+    margin-bottom: 20px;
+  }
+
+  .nav-section-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 5px 8px;
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    border-radius: 4px;
+    margin-bottom: 1px;
+    transition: all 0.1s;
+  }
+
+  .nav-item:hover { background: var(--s2); color: var(--text); }
+  .nav-item.active { background: var(--blue-bg); color: var(--blue); }
+
+  .version-pill {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 6px;
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid var(--green-b);
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Main content */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    max-width: 900px;
+    padding: 48px 60px 120px;
+  }
+
+  /* Section */
+  .section { margin-bottom: 80px; }
+
+  .section-overline {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--blue);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 40px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    margin-top: 48px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+    margin-top: 28px;
+  }
+
+  p {
+    color: #a1a1aa;
+    margin-bottom: 16px;
+    line-height: 1.75;
+  }
+
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 16px 0;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  code {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    color: var(--teal);
+  }
+
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #e4e4e7;
+    font-size: 12px;
+  }
+
+  .comment { color: #52525b; }
+  .keyword { color: var(--purple); }
+  .string { color: var(--green); }
+  .number { color: var(--amber); }
+  .key { color: var(--blue); }
+
+  /* Callout */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 12px;
+  }
+
+  .callout.info { border-color: var(--blue); background: var(--blue-bg); color: #93c5fd; }
+  .callout.warn { border-color: var(--amber); background: var(--amber-bg); color: #fde68a; }
+  .callout.success { border-color: var(--green); background: var(--green-bg); color: #86efac; }
+  .callout.new { border-color: var(--purple); background: var(--purple-bg); color: #d8b4fe; }
+
+  /* Tool card */
+  .tool-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+
+  .tool-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .tool-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--teal);
+    font-family: 'Geist Mono', monospace;
+  }
+
+  .tool-version {
+    font-size: 9px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+  }
+
+  .tool-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+
+  .tool-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .tag {
+    font-size: 9px;
+    padding: 2px 8px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .tag-live { color: var(--green); border-color: var(--green-b); background: var(--green-bg); }
+  .tag-pending { color: var(--amber); border-color: var(--amber-b); background: var(--amber-bg); }
+  .tag-signal { color: var(--blue); border-color: var(--blue-b); background: var(--blue-bg); }
+  .tag-kreditvakt { color: var(--purple); border-color: var(--purple-b); background: var(--purple-bg); }
+  .tag-sigvik { color: var(--teal); border-color: var(--teal-b); background: var(--teal-bg); }
+  .tag-jarvis { color: var(--amber); border-color: var(--amber-b); background: var(--amber-bg); }
+
+  /* Pricing tables */
+  .pricing-era {
+    margin-bottom: 48px;
+  }
+
+  .era-label {
+    display: inline-block;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    padding: 3px 10px;
+    border: 1px solid;
+    margin-bottom: 20px;
+  }
+
+  .era-human { color: var(--blue); border-color: var(--blue-b); background: var(--blue-bg); }
+  .era-agent { color: var(--purple); border-color: var(--purple-b); background: var(--purple-bg); }
+  .era-institutional { color: var(--amber); border-color: var(--amber-b); background: var(--amber-bg); }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .pricing-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+  .plan-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    padding: 24px;
+    position: relative;
+  }
+
+  .plan-card.featured {
+    border-color: var(--blue-b);
+    background: var(--blue-bg);
+  }
+
+  .plan-card.agent-featured {
+    border-color: var(--purple-b);
+    background: var(--purple-bg);
+  }
+
+  .plan-featured-badge {
+    position: absolute;
+    top: -1px; right: 16px;
+    font-size: 9px;
+    padding: 2px 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .plan-featured-badge.blue { background: var(--blue); color: var(--bg); }
+  .plan-featured-badge.purple { background: var(--purple); color: var(--bg); }
+
+  .plan-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .plan-price {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  .plan-price-unit { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+  .plan-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .plan-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .plan-feature-check { color: var(--green); flex-shrink: 0; margin-top: 1px; }
+  .plan-feature-dash { color: var(--dim); flex-shrink: 0; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 28px; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -25px;
+    top: 4px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid;
+  }
+
+  .timeline-dot.now { border-color: var(--green); background: var(--green); }
+  .timeline-dot.near { border-color: var(--blue); background: var(--blue-bg); }
+  .timeline-dot.mid { border-color: var(--purple); background: var(--purple-bg); }
+  .timeline-dot.far { border-color: var(--amber); background: var(--amber-bg); }
+
+  .timeline-period {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .timeline-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .timeline-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* Response schema */
+  .schema-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    margin: 16px 0;
+    font-size: 11px;
+    line-height: 1.8;
+  }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 12px; }
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--s2);
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: #a1a1aa;
+    vertical-align: top;
+  }
+  td:first-child { color: var(--text); font-family: 'Geist Mono', monospace; }
+  tr:hover td { background: var(--s2); }
+
+  /* Endpoint pill */
+  .method {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .method-post { background: #1a3a1a; color: var(--green); }
+  .method-get  { background: #0c1a3a; color: var(--blue); }
+
+  /* Rate limit bar */
+  .rate-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .rate-label { font-size: 11px; color: var(--muted); min-width: 140px; }
+  .rate-track { flex: 1; height: 3px; background: var(--border2); border-radius: 2px; }
+  .rate-fill { height: 100%; border-radius: 2px; }
+  .rate-val { font-size: 11px; color: var(--text); min-width: 80px; text-align: right; }
+
+  /* Divider */
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-name">Norric <span>AB</span></div>
+      <div class="sidebar-logo-tag">MCP Developer Docs</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Getting started</div>
+      <a href="#overview" class="nav-item active">Overview</a>
+      <a href="#quickstart" class="nav-item">Quickstart</a>
+      <a href="#authentication" class="nav-item">Authentication</a>
+      <a href="#response-format" class="nav-item">Response format</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Tools</div>
+      <a href="#signal-tools" class="nav-item">SIGNAL tools</a>
+      <a href="#kreditvakt-tools" class="nav-item">Kreditvakt tools</a>
+      <a href="#sigvik-tools" class="nav-item">Sigvik tools</a>
+      <a href="#jarvis-tools" class="nav-item">Jarvis tools</a>
+      <a href="#roadmap-tools" class="nav-item">Roadmap <span class="version-pill">soon</span></a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Agents</div>
+      <a href="#agent-patterns" class="nav-item">Agent patterns</a>
+      <a href="#streaming" class="nav-item">Streaming</a>
+      <a href="#webhooks" class="nav-item">Webhooks</a>
+      <a href="#sandbox" class="nav-item">Sandbox</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Pricing</div>
+      <a href="#pricing-human" class="nav-item">Human tier</a>
+      <a href="#pricing-agent" class="nav-item">Agent tier</a>
+      <a href="#pricing-institutional" class="nav-item">Institutional</a>
+      <a href="#pricing-roadmap" class="nav-item">Pricing roadmap</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Reference</div>
+      <a href="#rate-limits" class="nav-item">Rate limits</a>
+      <a href="#errors" class="nav-item">Error codes</a>
+      <a href="#changelog" class="nav-item">Changelog</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <div class="section" id="overview">
+      <div class="section-overline">Norric MCP Server · v1.0</div>
+      <h1>Swedish business intelligence<br>for humans and agents.</h1>
+      <p>The Norric MCP server exposes Swedish economic intelligence — credit risk, procurement signals, BRF data, and company lifecycle signals — through a single Model Context Protocol endpoint. Built for Claude Code, Cursor, Windsurf, and any MCP-compatible agent runtime.</p>
+
+      <div class="callout info">
+        <strong>Base URL:</strong> <code>https://norric-mcp-production.up.railway.app/mcp</code><br>
+        <strong>Protocol:</strong> Streamable HTTP (MCP 2026 standard) · FastMCP 3.2.3<br>
+        <strong>Tools:</strong> 19 live · 4 in development<br>
+        <strong>Coverage:</strong> Sweden · expanding to Denmark + Norway (2027)
+      </div>
+
+      <div class="callout new">
+        <strong>Post-AGI ready:</strong> Every tool returns a versioned <code>NorricResponse</code> envelope with <code>confidence</code>, <code>ttl</code>, <code>suggested_action</code>, and <code>data_freshness_seconds</code> — fields designed for autonomous agent decision loops, not just human dashboards.
+      </div>
+    </div>
+
+    <!-- QUICKSTART -->
+    <div class="section" id="quickstart">
+      <h2>Quickstart</h2>
+
+      <h3>1. Add to Claude Code (~/.claude.json)</h3>
+      <pre><code>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"norric"</span>: {
+      <span class="key">"type"</span>: <span class="string">"http"</span>,
+      <span class="key">"url"</span>: <span class="string">"https://norric-mcp-production.up.railway.app/mcp"</span>,
+      <span class="key">"headers"</span>: {
+        <span class="key">"X-Norric-Key"</span>: <span class="string">"nk_prod_signal_YOUR_KEY_HERE"</span>
+      }
+    }
+  }
+}</code></pre>
+
+      <h3>2. Call your first tool</h3>
+      <pre><code><span class="comment"># Score a Swedish company for payment risk</span>
+curl -X POST https://norric-mcp-production.up.railway.app/mcp \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -H <span class="string">"Accept: application/json, text/event-stream"</span> \
+  -H <span class="string">"X-Norric-Key: nk_prod_kreditvakt_YOUR_KEY"</span> \
+  -d <span class="string">'{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "kreditvakt_score_company_v1",
+      "arguments": {
+        "org_nr": "556714-7916",
+        "include_graph": false
+      }
+    }
+  }'</span></code></pre>
+
+      <h3>3. Get this week's SIGNAL call list</h3>
+      <pre><code>mcp__norric__signal_weekly_call_list_v1(
+    vertikal=<span class="string">"aldreomsorg"</span>,
+    limit=<span class="number">10</span>
+)</code></pre>
+    </div>
+
+    <!-- AUTHENTICATION -->
+    <div class="section" id="authentication">
+      <h2>Authentication</h2>
+      <p>Norric uses capability-scoped API keys. Each key grants access to specific product verticals. Keys are passed via the <code>X-Norric-Key</code> header or as a <code>Bearer</code> token.</p>
+
+      <h3>Key format</h3>
+      <pre><code>nk_{environment}_{capabilities}_{random}
+
+<span class="comment"># Examples</span>
+nk_prod_signal_a7f3k9x2          <span class="comment"># SIGNAL tools only, production</span>
+nk_prod_kreditvakt_m2p8q1z4      <span class="comment"># Kreditvakt tools only, production</span>
+nk_prod_all_b5r7n3w9             <span class="comment"># All tools, production</span>
+nk_sandbox_all_c4t6y8v2          <span class="comment"># All tools, sandbox (free tier)</span></code></pre>
+
+      <table>
+        <tr><th>Scope</th><th>Tools included</th><th>Pricing track</th></tr>
+        <tr><td>signal</td><td>signal_weekly_call_list_v1, signal_score_municipality_v1, signal_municipality_briefing_v1, signal_contract_expiry_alerts_v1, signal_sweden_pulse_v1</td><td>SIGNAL plans</td></tr>
+        <tr><td>kreditvakt</td><td>kreditvakt_score_company_v1, kreditvakt_batch_score_v1, kreditvakt_debt_signals_v1, kreditvakt_bankruptcy_status_v1</td><td>Kreditvakt plans</td></tr>
+        <tr><td>sigvik</td><td>sigvik_brf_lookup_v1, sigvik_brf_score_v1, sigvik_energiklass_v1</td><td>Sigvik plans</td></tr>
+        <tr><td>jarvis</td><td>jarvis_portfolio_status_v1, jarvis_strategy_summary_v1</td><td>Internal only</td></tr>
+        <tr><td>all</td><td>All 19 tools</td><td>Enterprise / institutional</td></tr>
+      </table>
+    </div>
+
+    <!-- RESPONSE FORMAT -->
+    <div class="section" id="response-format">
+      <h2>Response format</h2>
+      <p>Every tool returns the universal <code>NorricResponse</code> envelope. This is non-negotiable — no tool deviates from this schema. Agents can rely on it unconditionally.</p>
+
+      <div class="schema-box">
+<span class="keyword">NorricResponse</span> {
+  <span class="key">success</span>:              <span class="keyword">bool</span>        <span class="comment"># True if tool executed without error</span>
+  <span class="key">tool</span>:                <span class="keyword">str</span>         <span class="comment"># Tool name + version e.g. "kreditvakt_score_company_v1"</span>
+  <span class="key">source</span>:              <span class="keyword">list[str]</span>   <span class="comment"># Data sources used e.g. ["skatteverket", "bolagsverket"]</span>
+  <span class="key">confidence</span>:          <span class="keyword">float</span>       <span class="comment"># 0.0–1.0. Below 0.7 = treat with caution</span>
+  <span class="key">ttl</span>:                 <span class="keyword">int</span>         <span class="comment"># Cache TTL in seconds. Agent should not re-call before expiry.</span>
+  <span class="key">data</span>:                <span class="keyword">dict</span>        <span class="comment"># Tool-specific payload (see per-tool schemas below)</span>
+  <span class="key">metadata</span>:            <span class="keyword">dict</span>        <span class="comment"># Tool, source, confidence, ttl echoed for auditability</span>
+  <span class="key">signals</span>:             <span class="keyword">list</span>        <span class="comment"># Key signals driving the result</span>
+  <span class="key">warnings</span>:            <span class="keyword">list[str]</span>   <span class="comment"># Non-fatal issues e.g. stale data</span>
+  <span class="key">suggested_action</span>:    <span class="keyword">str|null</span>    <span class="comment"># Agent-interpretable next step (post-AGI field)</span>
+  <span class="key">data_freshness_secs</span>: <span class="keyword">int|null</span>    <span class="comment"># Seconds since underlying data was fetched</span>
+}
+      </div>
+
+      <div class="callout warn">
+        <strong>Agent design note:</strong> Always check <code>confidence</code> before acting on a result. If <code>confidence &lt; 0.7</code>, treat the result as advisory only. If <code>warnings</code> is non-empty, inspect before escalating to a human action.
+      </div>
+    </div>
+
+    <!-- SIGNAL TOOLS -->
+    <div class="section" id="signal-tools">
+      <h2>SIGNAL tools</h2>
+      <p>Municipality procurement intelligence. 13 signal sources across 290 Swedish municipalities. Operates at procurement step 1 — intent signals — vs Mercell/Opic which operate at step 4.</p>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">signal_weekly_call_list_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">Returns this week's ranked municipality call list for a vertical. The Monday morning brief for sales teams and autonomous SDR agents. Sorted by composite procurement score descending.</div>
+        <div class="tool-tags">
+          <span class="tag tag-live">Live</span>
+          <span class="tag tag-signal">SIGNAL</span>
+        </div>
+        <pre style="margin-top:12px"><code><span class="comment"># Parameters</span>
+vertikal: <span class="keyword">str</span>      <span class="comment"># aldreomsorg | skola | it_digital | fastighet | hr | bygg | annat</span>
+limit:    <span class="keyword">int</span>      <span class="comment"># 1–50, default 10</span>
+
+<span class="comment"># Returns</span>
+entries: [{
+  rank:            <span class="keyword">int</span>
+  kommunkod:       <span class="keyword">str</span>         <span class="comment"># 4-digit Swedish municipality code</span>
+  municipality_name: <span class="keyword">str</span>
+  composite_score: <span class="keyword">float</span>       <span class="comment"># 0–100. Malmö 87.8, Stockholm 85.0</span>
+  urgency:         <span class="keyword">str</span>         <span class="comment"># hot | warm | quiet</span>
+  components:      <span class="keyword">list</span>        <span class="comment"># 7-component score breakdown</span>
+}]</code></pre>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">signal_score_municipality_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">Deep score for a single municipality × vertical pair. Returns 7-component breakdown: agenda signals, IVO decisions, awarded contracts, Kolada metrics, demographics, election results, and NLP classifier output.</div>
+        <div class="tool-tags"><span class="tag tag-live">Live</span><span class="tag tag-signal">SIGNAL</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">signal_municipality_briefing_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">Generates a full Swedish-language call briefing: what happened (facts), why it matters commercially, optimal call window, 3 talking points, and incumbent risk flag. Designed for autonomous SDR agents before dialling.</div>
+        <div class="tool-tags"><span class="tag tag-live">Live</span><span class="tag tag-signal">SIGNAL</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">signal_contract_expiry_alerts_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">Returns contracts expiring in the next 90/180/365 days by municipality and vertical. Primary trigger for proactive outreach before re-procurement begins.</div>
+        <div class="tool-tags"><span class="tag tag-live">Live</span><span class="tag tag-signal">SIGNAL</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">signal_sweden_pulse_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">National pulse — aggregate procurement activity across all 290 municipalities for a vertical. Week-on-week trend. Used for macro signal detection and quarterly planning.</div>
+        <div class="tool-tags"><span class="tag tag-live">Live</span><span class="tag tag-signal">SIGNAL</span></div>
+      </div>
+    </div>
+
+    <!-- KREDITVAKT TOOLS -->
+    <div class="section" id="kreditvakt-tools">
+      <h2>Kreditvakt tools</h2>
+      <p>Swedish B2B payment risk engine. Reads Kronofogden enforcement cases, Skatteverket debt trajectory, and Bolagsverket filings. Backtest validated: 6x lift factor, 9-month median warning, 80% bankruptcy coverage.</p>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">kreditvakt_score_company_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">Primary credit risk tool. Two-stage scoring: hard gates (Kronofogden enforcement, bankruptcy petition, escalating tax debt) then weighted signal assessment. Returns GREEN/AMBER/RED with plain-Swedish recommendation.</div>
+        <div class="tool-tags"><span class="tag tag-live">Live</span><span class="tag tag-kreditvakt">Kreditvakt</span></div>
+        <pre style="margin-top:12px"><code>org_nr:         <span class="keyword">OrgnrStr</span>    <span class="comment"># Swedish format: XXXXXX-XXXX</span>
+include_graph:  <span class="keyword">bool</span>        <span class="comment"># Include ownership chain (default false)</span>
+
+<span class="comment"># Returns</span>
+signal:         <span class="keyword">str</span>         <span class="comment"># GREEN | AMBER | RED</span>
+recommendation_sv: <span class="keyword">str</span>      <span class="comment"># Plain Swedish action e.g. "Kräv förskottsbetalning"</span>
+hard_gate_fired: <span class="keyword">bool</span>
+reason_codes:   <span class="keyword">list[str]</span>
+confidence:     <span class="keyword">float</span></code></pre>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">kreditvakt_batch_score_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">Batch scoring for factoring companies reviewing credit exposure at scale. Up to 500 org_nr per call. Returns ranked risk list with aggregate portfolio statistics.</div>
+        <div class="tool-tags"><span class="tag tag-live">Live</span><span class="tag tag-kreditvakt">Kreditvakt</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">kreditvakt_debt_signals_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">Raw Skatteverket debt signal with trajectory analysis. Returns current quarter debt, previous quarter, trajectory (ESCALATING/STATIC/NONE), and threshold breach flags.</div>
+        <div class="tool-tags"><span class="tag tag-live">Live</span><span class="tag tag-kreditvakt">Kreditvakt</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">kreditvakt_bankruptcy_status_v1</div>
+          <div class="tool-version">v1 · live</div>
+        </div>
+        <div class="tool-desc">Binary verification — use score_company_v1 for predictive risk. This tool confirms whether a formal bankruptcy or liquidation petition is registered at Bolagsverket right now.</div>
+        <div class="tool-tags"><span class="tag tag-live">Live</span><span class="tag tag-kreditvakt">Kreditvakt</span></div>
+      </div>
+    </div>
+
+    <!-- ROADMAP TOOLS -->
+    <div class="section" id="roadmap-tools">
+      <h2>Roadmap tools</h2>
+
+      <div class="callout new">
+        These tools are in development and will be available in Q3 2026. Architecture is defined. Data pipeline is being connected.
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">norric_entity_deep_score</div>
+          <div class="tool-version">Q3 2026</div>
+        </div>
+        <div class="tool-desc">Entity score + full ownership chain traversal + enforcement history + counterparty network risk. Single call replaces 3 current tool calls. Designed for due diligence agents.</div>
+        <div class="tool-tags"><span class="tag tag-pending">Roadmap</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">norric_watchlist_diff</div>
+          <div class="tool-version">Q3 2026</div>
+        </div>
+        <div class="tool-desc">Pass a list of org_nr and a since_timestamp. Returns only entities where signals changed. Designed for nightly monitoring agents — zero redundant data transfer.</div>
+        <div class="tool-tags"><span class="tag tag-pending">Roadmap</span></div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-name">norric_sector_brief</div>
+          <div class="tool-version">Q4 2026</div>
+        </div>
+        <div class="tool-desc">Market entry intelligence. Pass an SNI code and municipality codes. Returns aggregate signal summary for that sector/geography. Designed for market entry agents and institutional analysts.</div>
+        <div class="tool-tags"><span class="tag tag-pending">Roadmap</span></div>
+      </div>
+    </div>
+
+    <!-- AGENT PATTERNS -->
+    <div class="section" id="agent-patterns">
+      <h2>Agent patterns</h2>
+      <p>Norric tools are designed for autonomous agent workflows. Here are the four canonical patterns.</p>
+
+      <h3>Pattern 1: Due diligence agent</h3>
+      <pre><code><span class="comment"># Before onboarding a new B2B customer</span>
+result = mcp__norric__kreditvakt_score_company_v1(org_nr=<span class="string">"556714-7916"</span>)
+
+<span class="keyword">if</span> result.data[<span class="string">"signal"</span>] == <span class="string">"RED"</span>:
+    <span class="comment"># Agent flags for human review, does not proceed</span>
+    escalate(result.data[<span class="string">"recommendation_sv"</span>])
+<span class="keyword">elif</span> result.data[<span class="string">"signal"</span>] == <span class="string">"AMBER"</span>:
+    <span class="comment"># Agent adjusts payment terms automatically</span>
+    set_payment_terms(days=<span class="number">14</span>, upfront=<span class="number">0.5</span>)
+<span class="keyword">else</span>:
+    <span class="comment"># GREEN — proceed with standard 30-day terms</span>
+    proceed_standard()</code></pre>
+
+      <h3>Pattern 2: Procurement monitoring agent</h3>
+      <pre><code><span class="comment"># Runs nightly — Monday generates the week's call list</span>
+call_list = mcp__norric__signal_weekly_call_list_v1(
+    vertikal=<span class="string">"aldreomsorg"</span>,
+    limit=<span class="number">10</span>
+)
+
+<span class="keyword">for</span> municipality in call_list.data[<span class="string">"entries"</span>]:
+    <span class="keyword">if</span> municipality[<span class="string">"urgency"</span>] == <span class="string">"hot"</span>:
+        briefing = mcp__norric__signal_municipality_briefing_v1(
+            kommunkod=municipality[<span class="string">"kommunkod"</span>],
+            vertikal=<span class="string">"aldreomsorg"</span>
+        )
+        schedule_call(municipality, briefing.data[<span class="string">"talking_points"</span>])</code></pre>
+
+      <h3>Pattern 3: Portfolio monitoring agent (nightly)</h3>
+      <pre><code><span class="comment"># Runs at 02:00 CET — silent unless exception threshold crossed</span>
+watchlist = load_customer_org_nrs()  <span class="comment"># Your customer portfolio</span>
+
+changes = mcp__norric__norric_watchlist_diff(  <span class="comment"># Q3 2026</span>
+    org_nr_list=watchlist,
+    since_timestamp=yesterday_midnight
+)
+
+<span class="keyword">for</span> entity in changes.data[<span class="string">"changed"</span>]:
+    <span class="keyword">if</span> entity[<span class="string">"severity"</span>] == <span class="string">"high"</span>:
+        alert_account_manager(entity)  <span class="comment"># Only escalates material changes</span></code></pre>
+
+      <h3>TTL and caching</h3>
+      <p>Every NorricResponse includes a <code>ttl</code> field in seconds. Agents must respect this. Do not re-call a tool before the TTL expires — data will not have changed and you will waste call quota.</p>
+      <table>
+        <tr><th>Tool category</th><th>TTL</th><th>Reason</th></tr>
+        <tr><td>kreditvakt_score_*</td><td>43,200s (12h)</td><td>Nightly data refresh from Skatteverket/Bolagsverket</td></tr>
+        <tr><td>signal_weekly_call_list_v1</td><td>43,200s (12h)</td><td>Weekly score — refreshed Monday 06:00 CET</td></tr>
+        <tr><td>signal_municipality_briefing_v1</td><td>86,400s (24h)</td><td>NLP briefing cached per municipality/vertical/day</td></tr>
+        <tr><td>kreditvakt_bankruptcy_status_v1</td><td>3,600s (1h)</td><td>Hard confirmation — checked more frequently</td></tr>
+        <tr><td>norric_watchlist_diff</td><td>0s</td><td>Always live — diff from timestamp provided</td></tr>
+      </table>
+    </div>
+
+    <!-- PRICING: HUMAN TIER -->
+    <div class="section" id="pricing-human">
+      <h2>Pricing — Human tier</h2>
+      <div class="section-overline" style="margin-top:-8px">Now → 2026 · SMB and consultant access</div>
+
+      <div class="pricing-era">
+        <div class="era-label era-human">Human era · pre-AGI</div>
+        <p>Priced for Swedish SMBs, redovisningskonsulter, and sales teams. Flat monthly subscriptions. No per-call complexity. Works like any SaaS tool.</p>
+
+        <div class="pricing-grid">
+          <div class="plan-card">
+            <div class="plan-name">Starter</div>
+            <div class="plan-price">0 kr</div>
+            <div class="plan-price-unit">/ month · sandbox only</div>
+            <div class="plan-divider"></div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> 100 tool calls/month</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Sandbox data (not live)</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> All tool schemas</div>
+            <div class="plan-feature"><span class="plan-feature-dash">–</span> No live Kreditvakt scores</div>
+            <div class="plan-feature"><span class="plan-feature-dash">–</span> No SIGNAL call list</div>
+            <div class="plan-feature"><span class="plan-feature-dash">–</span> No support</div>
+          </div>
+
+          <div class="plan-card featured">
+            <div class="plan-featured-badge blue">Most popular</div>
+            <div class="plan-name">Professional</div>
+            <div class="plan-price">299 kr</div>
+            <div class="plan-price-unit">/ month per product</div>
+            <div class="plan-divider"></div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> 1,000 tool calls/month</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Live data (nightly refresh)</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> One product scope (e.g. Kreditvakt)</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Fortnox integration included</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Email support</div>
+            <div class="plan-feature"><span class="plan-feature-dash">–</span> No cross-product tools</div>
+          </div>
+
+          <div class="plan-card">
+            <div class="plan-name">Konsult</div>
+            <div class="plan-price">499 kr</div>
+            <div class="plan-price-unit">/ month · up to 50 clients</div>
+            <div class="plan-divider"></div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> 10,000 tool calls/month</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> All product scopes</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Client management portal</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Bulk Kreditvakt checks</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Weekly SIGNAL digest</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> White-label option (+199 kr)</div>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <strong>Per-check pricing alternative:</strong> 0.50 kr per Kreditvakt call · 1.00 kr per SIGNAL municipality score. Available on the Starter plan for low-volume use. Billed monthly via Autogiro.
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING: AGENT TIER -->
+    <div class="section" id="pricing-agent">
+      <h2>Pricing — Agent tier</h2>
+      <div class="section-overline" style="margin-top:-8px">2026–2027 · Autonomous agent access</div>
+
+      <div class="pricing-era">
+        <div class="era-label era-agent">Agent era · transitional</div>
+        <p>Priced per call, not per seat. Agents don't churn, don't need onboarding, and call at scale. A single agent deployment can call Norric 10,000 times per month — pricing reflects this asymmetry. Agents that work don't get changed.</p>
+
+        <div class="pricing-grid pricing-grid-2">
+          <div class="plan-card">
+            <div class="plan-name">Developer</div>
+            <div class="plan-price">0.50 kr</div>
+            <div class="plan-price-unit">/ call · billed monthly</div>
+            <div class="plan-divider"></div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> All tools, live data</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Sub-100ms cached responses</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Versioned API (v1 → stable forever)</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Machine-readable error codes</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> suggested_action field on all responses</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> 10k calls/month minimum</div>
+          </div>
+
+          <div class="plan-card agent-featured">
+            <div class="plan-featured-badge purple">Agent-native</div>
+            <div class="plan-name">Webhook stream</div>
+            <div class="plan-price">9,900 kr</div>
+            <div class="plan-price-unit">/ month · up to 1,000 entities</div>
+            <div class="plan-divider"></div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Real-time push on signal changes</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Structured event payload (no polling)</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Filter by entity list, geography, signal type</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Agent receives push → acts autonomously</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Scales: 5,000 entities = 49,500 kr/mo</div>
+            <div class="plan-feature"><span class="plan-feature-check">✓</span> Dedicated Railway instance available</div>
+          </div>
+        </div>
+
+        <h3>Agent-specific pricing for watchlist monitoring</h3>
+        <table>
+          <tr><th>Use case</th><th>Tool</th><th>Price</th><th>Agent value</th></tr>
+          <tr><td>Due diligence per entity</td><td>kreditvakt_score_company_v1</td><td>2 kr/call (deep) · 0.50 kr (standard)</td><td>Agent checks every new customer automatically</td></tr>
+          <tr><td>Portfolio monitoring</td><td>norric_watchlist_diff</td><td>10 kr/entity/month</td><td>Agent monitors 200 customers for 2,000 kr/mo</td></tr>
+          <tr><td>Procurement scan</td><td>signal_weekly_call_list_v1</td><td>Included in SIGNAL plans</td><td>Agent generates SDR call list every Monday</td></tr>
+          <tr><td>Market entry brief</td><td>norric_sector_brief</td><td>5,000 kr/brief</td><td>Agent generates full sector intelligence on demand</td></tr>
+        </table>
+
+        <div class="callout new">
+          <strong>Why agents pay more per call than humans:</strong> An agent that has been configured to call Norric on every invoice creation calls indefinitely at scale without a renewal conversation. The switching cost is a code change that requires human justification. Lifetime value of an agent customer is 5–10x a human SaaS customer at the same monthly price. Pricing reflects this.
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING: INSTITUTIONAL -->
+    <div class="section" id="pricing-institutional">
+      <h2>Pricing — Institutional tier</h2>
+      <div class="section-overline" style="margin-top:-8px">2027+ · Banks, factoring, insurance, PE</div>
+
+      <div class="pricing-era">
+        <div class="era-label era-institutional">Institutional era · data asset monetisation</div>
+        <p>At this tier, Norric is not selling software. It is licensing a proprietary Swedish economic intelligence dataset that accumulates daily and cannot be replicated. Pricing is annual contract, not monthly SaaS.</p>
+
+        <table>
+          <tr><th>Buyer</th><th>What they buy</th><th>Pricing model</th><th>Example contract</th></tr>
+          <tr><td>Factoring companies (Svea, Resurs, Hoist)</td><td>Invoice pre-qualification scores on their portfolio</td><td>0.1% of invoice face value scored · min 50,000 kr/mo</td><td>Svea scores 500 MSEK/mo = 500,000 kr/mo</td></tr>
+          <tr><td>Banks (Swedbank, Handelsbanken)</td><td>SMB lending early warning signals — portfolio distress monitoring</td><td>200,000–500,000 kr/year per institution</td><td>One bank = 300,000 kr ARR</td></tr>
+          <tr><td>Insurance (Atradius, Coface)</td><td>Trade credit underwriting data</td><td>Per-policy pricing · custom contract</td><td>TBD via pilot</td></tr>
+          <tr><td>Private equity</td><td>Portfolio company distress monitoring</td><td>5,000 kr/company/month</td><td>40-company portfolio = 200,000 kr/mo</td></tr>
+          <tr><td>Consultancies, investors</td><td>Norric intelligence platform access</td><td>50,000–200,000 kr/year</td><td>Full platform = top tier</td></tr>
+        </table>
+
+        <div class="callout warn">
+          <strong>Pilot program (starting now):</strong> 3 factoring companies get 90 days of free access to Kreditvakt API scores on their existing portfolio. They observe signal accuracy against their own outcome data. At day 90, they either sign or don't. Contact <a href="mailto:edgar@norric.io">edgar@norric.io</a> to join the pilot.
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING ROADMAP -->
+    <div class="section" id="pricing-roadmap">
+      <h2>Pricing roadmap</h2>
+      <p>How Norric's pricing evolves as the AI economy matures. The model shifts from human SaaS → agent-native → data licensing.</p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot now"></div>
+          <div class="timeline-period">Now — Q4 2026</div>
+          <div class="timeline-title">Human SaaS + early agent access</div>
+          <div class="timeline-body">299 kr/month flat rate. 0.50 kr/check pay-per-use. Fortnox marketplace. Konsult channel. Agent sandbox free. Per-call developer pricing introduced. First institutional pilot conversations started.</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot near"></div>
+          <div class="timeline-period">Q1–Q2 2027</div>
+          <div class="timeline-title">Agent tier dominant · usage-based billing</div>
+          <div class="timeline-body">Per-call metering live on all tools. Webhook stream product launched. Watchlist monitoring (norric_watchlist_diff) in production. First institutional data license signed. Pricing shifts: most revenue is per-call, not per-seat. MRP (monthly recurring per-call) replaces MRR as primary metric.</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot mid"></div>
+          <div class="timeline-period">Q3 2027 — 2028</div>
+          <div class="timeline-title">Data licensing dominant · model API launched</div>
+          <div class="timeline-body">Norric intelligence model fine-tuned on 18 months of outcome data. Model API licensed to Swedish fintechs. Institutional contracts with 2+ banks. Pan-Nordic expansion begins (Denmark CVR, Norway Brønnøysund). Pricing: human SaaS becomes the acquisition channel, institutional licensing is the revenue.</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot far"></div>
+          <div class="timeline-period">2028–2030</div>
+          <div class="timeline-title">Norric intelligence platform · Nordic data infrastructure</div>
+          <div class="timeline-body">Full platform: 290 municipalities, company graph, property, procurement, enforcement. 50,000–200,000 kr/year institutional subscription. Strategic acquisition conversations begin. Target: 2–5 GSEK valuation. Norric becomes the canonical Nordic business intelligence layer for the AI agent ecosystem.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RATE LIMITS -->
+    <div class="section" id="rate-limits">
+      <h2>Rate limits</h2>
+
+      <div class="rate-bar">
+        <span class="rate-label">Sandbox (free)</span>
+        <div class="rate-track"><div class="rate-fill" style="width:5%;background:#3f3f46"></div></div>
+        <span class="rate-val">100 / month</span>
+      </div>
+      <div class="rate-bar">
+        <span class="rate-label">Professional (299 kr)</span>
+        <div class="rate-track"><div class="rate-fill" style="width:20%;background:var(--blue)"></div></div>
+        <span class="rate-val">1,000 / month</span>
+      </div>
+      <div class="rate-bar">
+        <span class="rate-label">Konsult (499 kr)</span>
+        <div class="rate-track"><div class="rate-fill" style="width:50%;background:var(--blue)"></div></div>
+        <span class="rate-val">10,000 / month</span>
+      </div>
+      <div class="rate-bar">
+        <span class="rate-label">Developer (per-call)</span>
+        <div class="rate-track"><div class="rate-fill" style="width:80%;background:var(--purple)"></div></div>
+        <span class="rate-val">Unlimited · 0.50 kr/call</span>
+      </div>
+      <div class="rate-bar">
+        <span class="rate-label">Institutional</span>
+        <div class="rate-track"><div class="rate-fill" style="width:100%;background:var(--amber)"></div></div>
+        <span class="rate-val">Custom SLA</span>
+      </div>
+
+      <div class="callout warn" style="margin-top:20px">
+        Burst rate limit: 60 requests/minute per API key regardless of plan. Exceeding this returns HTTP 429. Agent loops should implement exponential backoff: wait 1s, 2s, 4s, 8s before retrying.
+      </div>
+    </div>
+
+    <!-- ERRORS -->
+    <div class="section" id="errors">
+      <h2>Error codes</h2>
+      <p>All errors return a machine-readable <code>error_code</code> alongside a human message. Agents should branch on <code>error_code</code>, not on the message string.</p>
+
+      <table>
+        <tr><th>Code</th><th>HTTP</th><th>Meaning</th><th>Agent action</th></tr>
+        <tr><td>ORG_NOT_FOUND</td><td>404</td><td>Organisationsnummer not in Bolagsverket</td><td>Verify format XXXXXX-XXXX, retry once. If still 404, flag for human review.</td></tr>
+        <tr><td>ORG_NR_FORMAT</td><td>400</td><td>Invalid org_nr format</td><td>Strip spaces and dashes, reformat to XXXXXX-XXXX, retry.</td></tr>
+        <tr><td>LOW_CONFIDENCE</td><td>200</td><td>Score returned but data is stale or incomplete</td><td>Check data_freshness_secs. If > 86400, treat result as advisory only.</td></tr>
+        <tr><td>CACHE_MISS</td><td>200</td><td>Org_nr not yet in cache — async fetch triggered</td><td>Wait 30s and retry. Result will be available after ingestion run.</td></tr>
+        <tr><td>RATE_LIMITED</td><td>429</td><td>Too many requests</td><td>Exponential backoff: 1s, 2s, 4s, 8s.</td></tr>
+        <tr><td>SCOPE_DENIED</td><td>403</td><td>API key does not have permission for this tool</td><td>Do not retry. Alert human — wrong key scope.</td></tr>
+        <tr><td>INGESTION_ERROR</td><td>200</td><td>Upstream data source temporarily unavailable</td><td>Return cached value if available. Set warnings flag. Retry next cycle.</td></tr>
+      </table>
+    </div>
+
+    <!-- CHANGELOG -->
+    <div class="section" id="changelog">
+      <h2>Changelog</h2>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot now"></div>
+          <div class="timeline-period">April 2026 · v1.0</div>
+          <div class="timeline-title">Initial release</div>
+          <div class="timeline-body">19 tools across 5 products. FastMCP 3.2.3, Streamable HTTP transport. Universal NorricResponse envelope. Capability-scoped API keys. Canonical Swedish types (OrgnrStr, KommunkodStr, VertikalEnum). Immutable audit trail for mutating tools. Global Claude Code connection via ~/.claude.json.</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot near"></div>
+          <div class="timeline-period">Coming · Q2 2026</div>
+          <div class="timeline-title">signal_weekly_call_list_v1 live data</div>
+          <div class="timeline-body">munisignal ingestion pipeline connected. Live municipality scoring active. 10 pilot municipalities, 60 vertical pairs, nightly rescore.</div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-dot near"></div>
+          <div class="timeline-period">Coming · Q3 2026</div>
+          <div class="timeline-title">norric_entity_deep_score + norric_watchlist_diff</div>
+          <div class="timeline-body">Graph engine live. Ownership chain traversal. Watchlist diff API for agent monitoring loops. Per-call metering on all tools.</div>
+        </div>
+      </div>
+
+      <hr>
+      <p style="font-size:11px;color:var(--muted);text-align:center">Norric AB · MCP Developer Docs · April 2026 · <a href="https://norric.io">norric.io</a> · <a href="mailto:edgar@norric.io">edgar@norric.io</a></p>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

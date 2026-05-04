@@ -119,9 +119,7 @@ export function SignupModal({ onClose }: Props) {
               </code>
             </p>
             <a
-              href="https://norric.io/developer-docs.html"
-              target="_blank"
-              rel="noreferrer"
+              href="/docs"
               className="block text-center text-[10px] uppercase tracking-[0.2em] font-bold py-3 transition-opacity hover:opacity-70"
               style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px' }}
             >
