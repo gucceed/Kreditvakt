@@ -189,25 +189,19 @@ export const Pricing = ({ onSignup }: { onSignup: () => void }) => (
             </ul>
           </div>
 
-          {tier.action.type === 'signup' ? (
-            <button
-              onClick={onSignup}
-              className="text-[10px] uppercase tracking-[0.2em] font-bold py-3 text-center w-full block transition-opacity hover:opacity-70"
-              style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px' }}
-            >
-              {tier.cta}
-            </button>
-          ) : (
-            <a
-              href={tier.action.type === 'mailto'
+          <a
+            href={
+              tier.action.type === 'signup'
+                ? 'mailto:hej@norric.io?subject=Kreditvakt&body=Hej,%20jag%20vill%20veta%20mer.'
+                : tier.action.type === 'mailto'
                 ? `mailto:${tier.action.address}?subject=${encodeURIComponent(tier.action.subject)}`
-                : tier.action.url}
-              className="text-[10px] uppercase tracking-[0.2em] font-bold py-3 text-center block transition-opacity hover:opacity-70"
-              style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px' }}
-            >
-              {tier.cta}
-            </a>
-          )}
+                : tier.action.url
+            }
+            className="text-[10px] uppercase tracking-[0.2em] font-bold py-3 text-center block transition-opacity hover:opacity-70"
+            style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px' }}
+          >
+            {tier.cta}
+          </a>
         </div>
       ))}
     </div>

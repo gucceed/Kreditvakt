@@ -74,6 +74,28 @@ export default function App() {
     >
       {showSignup && <SignupModal onClose={() => setSignup(false)} />}
 
+      {/* ── Beta banner ─────────────────────────────────────── */}
+      <div
+        style={{
+          background: 'var(--gold)',
+          color: 'var(--bg)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '11px',
+          textAlign: 'center',
+          padding: '10px 16px',
+          letterSpacing: '0.05em',
+        }}
+      >
+        Beta — kontakta{' '}
+        <a
+          href="mailto:hej@norric.io?subject=Kreditvakt&body=Hej,%20jag%20vill%20veta%20mer."
+          style={{ color: 'var(--bg)', textDecoration: 'underline', fontWeight: 700 }}
+        >
+          hej@norric.io
+        </a>
+        {' '}så hjälper vi er igång inom 4 timmar.
+      </div>
+
       {/* ── Nav ─────────────────────────────────────────────── */}
       <nav className="nav-glass fixed top-0 w-full z-50 px-6 md:px-12 py-5 flex items-center justify-between">
 
@@ -198,13 +220,13 @@ export default function App() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {/* gold 4 / 6 */}
-              <button
-                onClick={() => setSignup(true)}
+              <a
+                href="mailto:hej@norric.io?subject=Kreditvakt&body=Hej,%20jag%20vill%20veta%20mer."
                 className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-80"
                 style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
               >
                 Prova gratis — 10 uppslag
-              </button>
+              </a>
               <a
                 href="mailto:hej@norric.io?subject=Demo%20request"
                 className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-70"
@@ -545,13 +567,13 @@ export default function App() {
           </div>
         </div>
         {/* gold 6 / 6 */}
-        <button
-          onClick={() => setSignup(true)}
+        <a
+          href="mailto:hej@norric.io?subject=Kreditvakt&body=Hej,%20jag%20vill%20veta%20mer."
           className="text-[10px] uppercase tracking-[0.2em] font-bold px-5 py-3 transition-opacity hover:opacity-80"
           style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
         >
           Starta →
-        </button>
+        </a>
       </div>
     </div>
   );
