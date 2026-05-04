@@ -1,65 +1,59 @@
 import React from 'react';
 
-const TIERS = [
+// action: 'signup' opens the modal; 'mailto' opens email; 'href' navigates
+type TierAction = { type: 'signup' } | { type: 'mailto'; address: string; subject: string } | { type: 'href'; url: string };
+
+interface Tier {
+  badge: string; name: string; price: string; period: string; note: string;
+  description: string; features: string[]; cta: string;
+  highlighted: boolean; action: TierAction;
+}
+
+const TIERS: Tier[] = [
   {
-    badge: 'Gratis',
-    name: 'Free',
-    price: '0 kr',
-    period: '/månad',
+    badge: 'Gratis', name: 'Free', price: '0 kr', period: '/månad',
     note: 'Ingen kreditkort krävs',
     description: 'Bolagsstatuskontroller utan kostnad.',
     features: ['10 uppslag/månad', 'Bolagsstatus', '1 orgnr · delad kvot'],
-    cta: 'Skapa konto →',
-    href: 'https://norric-mcp-production.up.railway.app/signup/free',
+    cta: 'Skaffa nyckel →',
     highlighted: false,
+    action: { type: 'signup' },
   },
   {
-    badge: 'Grundläggande',
-    name: 'Silver',
-    price: '499 kr',
-    period: '/månad',
+    badge: 'Grundläggande', name: 'Silver', price: '499 kr', period: '/månad',
     note: 'Faktureras månadsvis',
     description: 'Kreditriskvärdering och automatiska varningar.',
     features: ['500 uppslag/månad', 'Kreditriskvärdering', 'Riskvarningar'],
-    cta: 'Välj Silver →',
-    href: 'https://norric-mcp-production.up.railway.app/checkout?tier=standard&billing=monthly',
+    cta: 'Starta abonnemang →',
     highlighted: false,
+    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Kreditvakt Silver — 499 kr/mån' },
   },
   {
-    badge: 'Mest valda',
-    name: 'Guld',
-    price: '1 499 kr',
-    period: '/månad',
+    badge: 'Mest valda', name: 'Guld', price: '1 499 kr', period: '/månad',
     note: 'Faktureras månadsvis',
     description: 'Komplett skuldöversikt med fordringsägardetaljer.',
     features: ['Obegränsade uppslag', 'Komplett skuldanalys', 'Fordringsägardetaljer', 'CSV-export'],
-    cta: 'Välj Guld →',
-    href: 'https://norric-mcp-production.up.railway.app/checkout?tier=standard&billing=annual',
+    cta: 'Starta abonnemang →',
     highlighted: true,
+    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Kreditvakt Guld — 1 499 kr/mån' },
   },
   {
-    badge: 'Avancerat',
-    name: 'Premium',
-    price: '4 999 kr',
-    period: '/månad',
+    badge: 'Avancerat', name: 'Premium', price: '4 999 kr', period: '/månad',
     note: 'Faktureras månadsvis',
     description: 'Guld plus dedikerad support, SLA och full API-åtkomst.',
     features: ['Obegränsade uppslag', 'Allt i Guld', 'Dedikerad support', 'SLA-garanti', 'Full API-åtkomst'],
-    cta: 'Välj Premium →',
-    href: 'https://norric-mcp-production.up.railway.app/checkout?tier=compliance&billing=annual',
+    cta: 'Boka introsamtal →',
     highlighted: false,
+    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Kreditvakt Premium — introsamtal' },
   },
   {
-    badge: 'Enterprise',
-    name: 'Enterprise',
-    price: 'Kontakta oss',
-    period: '',
+    badge: 'Enterprise', name: 'Enterprise', price: 'Kontakta oss', period: '',
     note: 'Skräddarsydd prissättning',
     description: 'Databaslicens, anpassade format och dedikerat SLA för banker.',
     features: ['Obegränsade uppslag', 'Fullständig databaslicens', 'Anpassade integrationer', 'Dedikerat SLA'],
     cta: 'Begär offert →',
-    href: 'mailto:hej@norric.io',
     highlighted: false,
+    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Kreditvakt Enterprise — offertförfrågan' },
   },
 ];
 
@@ -87,7 +81,7 @@ const TRUST = [
   },
 ];
 
-export const Pricing = () => (
+export const Pricing = ({ onSignup }: { onSignup: () => void }) => (
   <div style={{ fontFamily: 'var(--font-mono)' }} className="space-y-20">
 
     {/* ROI — clean table, no decoration */}
@@ -195,17 +189,25 @@ export const Pricing = () => (
             </ul>
           </div>
 
-          <a
-            href={tier.href}
-            className="text-[10px] uppercase tracking-[0.2em] font-bold py-3 text-center block transition-opacity hover:opacity-70"
-            style={{
-              border: '0.5px solid var(--border-h)',
-              color: 'var(--text-second)',
-              borderRadius: '2px',
-            }}
-          >
-            {tier.cta}
-          </a>
+          {tier.action.type === 'signup' ? (
+            <button
+              onClick={onSignup}
+              className="text-[10px] uppercase tracking-[0.2em] font-bold py-3 text-center w-full block transition-opacity hover:opacity-70"
+              style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px' }}
+            >
+              {tier.cta}
+            </button>
+          ) : (
+            <a
+              href={tier.action.type === 'mailto'
+                ? `mailto:${tier.action.address}?subject=${encodeURIComponent(tier.action.subject)}`
+                : tier.action.url}
+              className="text-[10px] uppercase tracking-[0.2em] font-bold py-3 text-center block transition-opacity hover:opacity-70"
+              style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px' }}
+            >
+              {tier.cta}
+            </a>
+          )}
         </div>
       ))}
     </div>

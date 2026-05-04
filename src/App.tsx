@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Pricing } from './components/Pricing';
+import { SignupModal } from './components/SignupModal';
 
 /* ── Inline mark — no icon library ────────────────────────── */
 const ShieldMark = ({ size = 16, style }: { size?: number; style?: React.CSSProperties }) => (
@@ -59,9 +60,10 @@ function ScoreBar({ score, color }: { score: number; color: string }) {
 
 /* ── App ───────────────────────────────────────────────────── */
 export default function App() {
-  const [light, setLight]   = useState(false);
-  const [menuOpen, setMenu] = useState(false);
-  const [demoIdx, setDemo]  = useState(0);
+  const [light, setLight]     = useState(false);
+  const [menuOpen, setMenu]   = useState(false);
+  const [demoIdx, setDemo]    = useState(0);
+  const [showSignup, setSignup] = useState(false);
 
   const demo = DEMO_COMPANIES[demoIdx];
 
@@ -70,6 +72,7 @@ export default function App() {
       className={light ? 'light' : ''}
       style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)', transition: 'background 0.3s ease' }}
     >
+      {showSignup && <SignupModal onClose={() => setSignup(false)} />}
 
       {/* ── Nav ─────────────────────────────────────────────── */}
       <nav className="nav-glass fixed top-0 w-full z-50 px-6 md:px-12 py-5 flex items-center justify-between">
@@ -195,13 +198,13 @@ export default function App() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {/* gold 4 / 6 */}
-              <a
-                href="https://norric-mcp-production.up.railway.app/signup/free"
+              <button
+                onClick={() => setSignup(true)}
                 className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-80"
                 style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
               >
                 Prova gratis — 10 uppslag
-              </a>
+              </button>
               <a
                 href="mailto:hej@norric.io?subject=Demo%20request"
                 className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-70"
@@ -485,7 +488,7 @@ export default function App() {
               Välj din plan
             </h2>
           </div>
-          <Pricing />
+          <Pricing onSignup={() => setSignup(true)} />
         </section>
 
         {/* ── Footer ──────────────────────────────────────────── */}
@@ -542,13 +545,13 @@ export default function App() {
           </div>
         </div>
         {/* gold 6 / 6 */}
-        <a
-          href="https://norric-mcp-production.up.railway.app/signup/free"
+        <button
+          onClick={() => setSignup(true)}
           className="text-[10px] uppercase tracking-[0.2em] font-bold px-5 py-3 transition-opacity hover:opacity-80"
           style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
         >
           Starta →
-        </a>
+        </button>
       </div>
     </div>
   );
