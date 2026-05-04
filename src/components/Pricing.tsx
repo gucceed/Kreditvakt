@@ -12,8 +12,8 @@ const TIERS: Tier[] = [
   {
     badge: 'Gratis', name: 'Free', price: '0 kr', period: '/månad',
     note: 'Ingen kreditkort krävs',
-    description: 'Bolagsstatuskontroller utan kostnad.',
-    features: ['10 uppslag/månad', 'Bolagsstatus', '1 orgnr · delad kvot'],
+    description: '10 sökningar för att testa Kreditvakt',
+    features: ['10 sökningar för att testa Kreditvakt', 'Bolagsstatus och insolvensrisk', 'Upp till 10 konton per företag'],
     cta: 'Skaffa nyckel →',
     highlighted: false,
     action: { type: 'signup' },

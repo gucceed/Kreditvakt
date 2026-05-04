@@ -117,7 +117,8 @@ export default function App() {
         >
           <a href="#produkt" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Produkt</a>
           <a href="#priser"  className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Priser</a>
-          <a href="/docs" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>API</a>
+          <a href="/docs"   className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>API</a>
+          <a href="/lookup" className="transition-opacity hover:opacity-100" style={{ opacity: 0.7 }}>Sök</a>
         </div>
 
         <div className="flex items-center gap-4">
@@ -170,7 +171,8 @@ export default function App() {
             {[
               { href: '#produkt', label: 'Produkt' },
               { href: '#priser',  label: 'Priser'  },
-              { href: '/docs', label: 'API' },
+              { href: '/docs',   label: 'API' },
+              { href: '/lookup', label: 'Sök' },
             ].map(({ href, label }) => (
               <a
                 key={href}
@@ -235,6 +237,13 @@ export default function App() {
                 style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
               >
                 Boka demo
+              </a>
+              <a
+                href="/lookup"
+                className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-70"
+                style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}
+              >
+                Har du redan en nyckel? Sök här →
               </a>
             </div>
           </motion.div>

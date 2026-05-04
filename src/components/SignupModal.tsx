@@ -74,7 +74,7 @@ export function SignupModal({ onClose }: Props) {
         <div className="flex justify-between items-start mb-8">
           <div>
             <p className="text-[9px] uppercase tracking-[0.3em] mb-2" style={{ color: 'var(--text-muted)' }}>
-              Gratis · 10 uppslag/månad
+              Gratis · 10 sökningar
             </p>
             <h2 className="font-serif text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
               Skaffa API-nyckel

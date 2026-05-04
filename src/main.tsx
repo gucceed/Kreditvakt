@@ -6,6 +6,7 @@ import SignupPage from './pages/SignupPage.tsx';
 import DocsPage from './pages/DocsPage.tsx';
 import SamplePage from './pages/SamplePage.tsx';
 import CheckoutPage from './pages/CheckoutPage.tsx';
+import LookupPage from './pages/LookupPage.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/checkout/success" element={<CheckoutPage />} />
         <Route path="/pricing" element={<App />} />
+        <Route path="/lookup" element={<LookupPage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

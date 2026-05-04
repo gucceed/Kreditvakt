@@ -6,8 +6,15 @@ type State = 'idle' | 'submitting' | 'success' | 'error';
 
 const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 
+function formatOrgnr(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) return `${digits.slice(0, 6)}-${digits.slice(6)}`;
+  return digits;
+}
+
 export default function SignupPage() {
   const [email, setEmail]       = useState('');
+  const [orgNr, setOrgNr]       = useState('');
   const [company, setCompany]   = useState('');
   const [useCase, setUseCase]   = useState('');
   const [state, setState]       = useState<State>('idle');
@@ -21,16 +28,29 @@ export default function SignupPage() {
       const res = await fetch(`${API}/signup/free`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, company, use_case: useCase || undefined }),
+        body: JSON.stringify({
+          email,
+          org_nr: orgNr.replace(/\D/g, ''),
+          company,
+          use_case: useCase || undefined,
+        }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setState('success');
       } else if (res.status === 409) {
         setErrMsg('Det finns redan en nyckel för den här e-postadressen. Mejla hej@norric.io om du behöver hjälp.');
         setState('error');
+      } else if (res.status === 403) {
+        const detail = data.detail || {};
+        setErrMsg(typeof detail === 'object' ? detail.message : detail);
+        setState('error');
       } else {
-        const data = await res.json().catch(() => ({}));
-        setErrMsg(data.detail || data.message || 'Något gick fel. Försök igen om en stund eller mejla hej@norric.io.');
+        setErrMsg(
+          (typeof data.detail === 'string' ? data.detail : null) ||
+          data.message ||
+          'Något gick fel. Försök igen om en stund eller mejla hej@norric.io.'
+        );
         setState('error');
       }
     } catch {
@@ -42,12 +62,8 @@ export default function SignupPage() {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
 
-      {/* Back link */}
       <div style={{ width: '100%', maxWidth: '480px', marginBottom: '2rem' }}>
-        <a
-          href="/"
-          style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.2em' }}
-        >
+        <a href="/" style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
           ← Kreditvakt
         </a>
       </div>
@@ -67,20 +83,25 @@ export default function SignupPage() {
               <a href="mailto:hej@norric.io" style={{ color: 'var(--text-primary)' }}>hej@norric.io</a>.
             </p>
             <a
+              href="/lookup"
+              style={{
+                ...mono,
+                display: 'block', textAlign: 'center',
+                fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700,
+                padding: '0.875rem', background: 'var(--gold)', color: 'var(--bg)',
+                borderRadius: '2px', textDecoration: 'none', marginBottom: '1rem',
+              }}
+            >
+              Sök direkt när nyckeln anlänt →
+            </a>
+            <a
               href="/docs"
               style={{
                 ...mono,
-                display: 'block',
-                textAlign: 'center',
-                fontSize: '10px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.2em',
-                fontWeight: 700,
-                padding: '0.875rem',
-                border: '0.5px solid var(--border-h)',
-                borderRadius: '2px',
-                color: 'var(--text-second)',
-                textDecoration: 'none',
+                display: 'block', textAlign: 'center',
+                fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700,
+                padding: '0.875rem', border: '0.5px solid var(--border-h)', color: 'var(--text-second)',
+                borderRadius: '2px', textDecoration: 'none',
               }}
             >
               Läs dokumentationen →
@@ -89,21 +110,19 @@ export default function SignupPage() {
         ) : (
           <>
             <p style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '1.5rem' }}>
-              Gratis · 100 uppslag/månad
+              Gratis · 10 sökningar
             </p>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '1rem' }}>
               Skaffa din API-nyckel
             </h1>
             <p style={{ ...mono, fontSize: '12px', color: 'var(--text-second)', lineHeight: 1.9, marginBottom: '2.5rem' }}>
-              100 gratis uppslag/månad. Inga kreditkortsuppgifter. Nyckeln skickas via mejl inom 60 sekunder.
+              10 gratis sökningar. Inga kreditkortsuppgifter. Nyckeln skickas via mejl inom 60 sekunder.
             </p>
 
             <form onSubmit={submit}>
               <Field label="E-postadress">
                 <input
-                  type="email"
-                  required
-                  value={email}
+                  type="email" required value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="din@organisation.se"
                   style={inputStyle}
@@ -112,11 +131,20 @@ export default function SignupPage() {
                 />
               </Field>
 
+              <Field label="Organisationsnummer">
+                <input
+                  type="text" required value={orgNr}
+                  onChange={e => setOrgNr(e.target.value)}
+                  onBlur={e => { if (e.target.value) setOrgNr(formatOrgnr(e.target.value)); }}
+                  placeholder="556123-4567"
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = 'var(--border-h)')}
+                />
+              </Field>
+
               <Field label="Företag">
                 <input
-                  type="text"
-                  required
-                  value={company}
+                  type="text" required value={company}
                   onChange={e => setCompany(e.target.value)}
                   placeholder="Acme AB"
                   style={inputStyle}
@@ -129,7 +157,7 @@ export default function SignupPage() {
                 <textarea
                   value={useCase}
                   onChange={e => setUseCase(e.target.value.slice(0, 200))}
-                  placeholder="T.ex. kreditbedömning av leverantörer, portföljövervakning..."
+                  placeholder="T.ex. kreditbedömning av leverantörer..."
                   rows={3}
                   style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.6' }}
                   onFocus={e => (e.target.style.borderColor = 'var(--border-h)')}
@@ -150,20 +178,11 @@ export default function SignupPage() {
                 type="submit"
                 disabled={state === 'submitting'}
                 style={{
-                  ...mono,
-                  width: '100%',
-                  background: 'var(--gold)',
-                  color: 'var(--bg)',
-                  border: 'none',
-                  borderRadius: '2px',
-                  padding: '0.9rem',
-                  fontSize: '10px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.25em',
-                  fontWeight: 700,
+                  ...mono, width: '100%', background: 'var(--gold)', color: 'var(--bg)',
+                  border: 'none', borderRadius: '2px', padding: '0.9rem',
+                  fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.25em', fontWeight: 700,
                   cursor: state === 'submitting' ? 'not-allowed' : 'pointer',
-                  opacity: state === 'submitting' ? 0.5 : 1,
-                  marginBottom: '1rem',
+                  opacity: state === 'submitting' ? 0.5 : 1, marginBottom: '1rem',
                 }}
               >
                 {state === 'submitting' ? 'Skickar…' : 'Skaffa API-nyckel'}
@@ -192,14 +211,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'transparent',
-  border: '0.5px solid var(--border)',
-  borderRadius: '2px',
-  padding: '0.75rem 1rem',
-  color: 'var(--text-primary)',
-  fontFamily: 'var(--font-mono)',
-  fontSize: '12px',
-  outline: 'none',
-  boxSizing: 'border-box',
+  width: '100%', background: 'transparent',
+  border: '0.5px solid var(--border)', borderRadius: '2px',
+  padding: '0.75rem 1rem', color: 'var(--text-primary)',
+  fontFamily: 'var(--font-mono)', fontSize: '12px',
+  outline: 'none', boxSizing: 'border-box',
 };
