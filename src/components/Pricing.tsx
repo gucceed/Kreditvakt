@@ -26,7 +26,7 @@ const TIERS: Tier[] = [
     features: ['500 uppslag/månad', 'Kreditriskvärdering', 'Riskvarningar'],
     cta: 'Starta abonnemang →',
     highlighted: false,
-    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Kreditvakt Silver — 499 kr/mån' },
+    action: { type: 'href', url: '/checkout?tier=standard&billing=monthly' },
   },
   {
     badge: 'Mest valda', name: 'Guld', price: '1 499 kr', period: '/månad',
@@ -35,16 +35,16 @@ const TIERS: Tier[] = [
     features: ['Obegränsade uppslag', 'Komplett skuldanalys', 'Fordringsägardetaljer', 'CSV-export'],
     cta: 'Starta abonnemang →',
     highlighted: true,
-    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Kreditvakt Guld — 1 499 kr/mån' },
+    action: { type: 'href', url: '/checkout?tier=standard&billing=annual' },
   },
   {
     badge: 'Avancerat', name: 'Premium', price: '4 999 kr', period: '/månad',
     note: 'Faktureras månadsvis',
     description: 'Guld plus dedikerad support, SLA och full API-åtkomst.',
     features: ['Obegränsade uppslag', 'Allt i Guld', 'Dedikerad support', 'SLA-garanti', 'Full API-åtkomst'],
-    cta: 'Boka introsamtal →',
+    cta: 'Starta abonnemang →',
     highlighted: false,
-    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Kreditvakt Premium — introsamtal' },
+    action: { type: 'href', url: '/checkout?tier=compliance&billing=annual' },
   },
   {
     badge: 'Enterprise', name: 'Enterprise', price: 'Kontakta oss', period: '',
