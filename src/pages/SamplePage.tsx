@@ -60,7 +60,7 @@ export default function SamplePage() {
           </div>
           <div>
             <div style={{ ...mono, fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '0.75rem' }}>Risknivå</div>
-            <div style={{ ...serif, fontSize: '1.5rem', fontWeight: 700, color: scoreColor }}>Hög risk</div>
+            <div style={{ ...serif, fontSize: '1.5rem', fontWeight: 700, color: scoreColor }}>Stoppa krediter</div>
             <div style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Konkursfrekvens 20–35%</div>
           </div>
           <div>

@@ -353,7 +353,7 @@ export default function LookupPage() {
                   {result.display_score}
                 </div>
                 <div style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.25em' }}>
-                  Risk: {result.display_score}/20 · {result.band_label.toLowerCase()}
+                  Risk: {result.display_score}/20 · {result.band_label}
                 </div>
               </div>
 

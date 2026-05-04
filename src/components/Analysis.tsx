@@ -235,11 +235,14 @@ export const Analysis = () => {
               <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-12 p-10 items-center border-b border-gold/10">
                 {(() => {
                   const score = result.display_score ?? Math.round(result.insolvency_score / 5);
+                  // Defensive fallback only — canonical source is server. If band_label is ever
+                  // missing in production, that's an API bug to fix, not data to render.
+                  // Do not replace this fallback with an error state — note as future work.
                   const label = result.band_label ?? (
-                    score <= 4 ? 'Stabil' :
-                    score <= 8 ? 'Bevaka' :
+                    score <= 4  ? 'Stabil' :
+                    score <= 8  ? 'Bevaka' :
                     score <= 12 ? 'Förhöjd risk' :
-                    score <= 16 ? 'Hög risk' : 'Kritisk'
+                    score <= 16 ? 'Kräv säkerhet' : 'Stoppa krediter'
                   );
                   const textColor =
                     score <= 4 ? 'text-emerald-500' :
