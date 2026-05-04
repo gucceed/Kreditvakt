@@ -1,7 +1,6 @@
 import React from 'react';
 
-// action: 'signup' opens the modal; 'mailto' opens email; 'href' navigates
-type TierAction = { type: 'signup' } | { type: 'mailto'; address: string; subject: string } | { type: 'href'; url: string };
+type TierAction = { type: 'signup' } | { type: 'mailto'; address: string; subject: string; body?: string } | { type: 'href'; url: string };
 
 interface Tier {
   badge: string; name: string; price: string; period: string; note: string;
@@ -26,25 +25,25 @@ const TIERS: Tier[] = [
     features: ['500 uppslag/månad', 'Kreditriskvärdering', 'Riskvarningar'],
     cta: 'Starta abonnemang →',
     highlighted: false,
-    action: { type: 'href', url: '/checkout?tier=standard&billing=monthly' },
+    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Silver-abonnemang Kreditvakt', body: 'Hej,%0A%0AJag%20vill%20teckna%20Silver-abonnemang%20(4%20900%20kr/mån).%0A%0AFöretag:%20%0AOrgnr:%20%0AKontaktperson:%20%0A' },
   },
   {
     badge: 'Mest valda', name: 'Guld', price: '1 499 kr', period: '/månad',
     note: 'Faktureras månadsvis',
     description: 'Komplett skuldöversikt med fordringsägardetaljer.',
     features: ['Obegränsade uppslag', 'Komplett skuldanalys', 'Fordringsägardetaljer', 'CSV-export'],
-    cta: 'Starta abonnemang →',
+    cta: 'Starta abonnemang (årlig) →',
     highlighted: true,
-    action: { type: 'href', url: '/checkout?tier=standard&billing=annual' },
+    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Guld-abonnemang Kreditvakt', body: 'Hej,%0A%0AJag%20vill%20teckna%20Guld-abonnemang%20(årlig%20fakturering).%0A%0AFöretag:%20%0AOrgnr:%20%0AKontaktperson:%20%0A' },
   },
   {
     badge: 'Avancerat', name: 'Premium', price: '4 999 kr', period: '/månad',
     note: 'Faktureras månadsvis',
     description: 'Guld plus dedikerad support, SLA och full API-åtkomst.',
     features: ['Obegränsade uppslag', 'Allt i Guld', 'Dedikerad support', 'SLA-garanti', 'Full API-åtkomst'],
-    cta: 'Starta abonnemang →',
+    cta: 'Boka introsamtal →',
     highlighted: false,
-    action: { type: 'href', url: '/checkout?tier=compliance&billing=annual' },
+    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Premium-tier Kreditvakt', body: 'Hej,%0A%0AVi%20är%20intresserade%20av%20Compliance/Premium-tier.%0A%0AFöretag:%20%0AKontaktperson:%20%0AAnvändningsfall:%20%0A' },
   },
   {
     badge: 'Enterprise', name: 'Enterprise', price: 'Kontakta oss', period: '',
@@ -200,7 +199,7 @@ export const Pricing = ({ onSignup }: { onSignup: () => void }) => (
           ) : (
             <a
               href={tier.action.type === 'mailto'
-                ? `mailto:${tier.action.address}?subject=${encodeURIComponent(tier.action.subject)}`
+                ? `mailto:${tier.action.address}?subject=${encodeURIComponent(tier.action.subject)}${tier.action.body ? `&body=${tier.action.body}` : ''}`
                 : tier.action.url}
               className="text-[10px] uppercase tracking-[0.2em] font-bold py-3 text-center block transition-opacity hover:opacity-70"
               style={{ border: '0.5px solid var(--border-h)', color: 'var(--text-second)', borderRadius: '2px' }}
