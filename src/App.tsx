@@ -220,13 +220,13 @@ export default function App() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {/* gold 4 / 6 */}
-              <a
-                href="mailto:hej@norric.io?subject=Kreditvakt&body=Hej,%20jag%20vill%20veta%20mer."
+              <button
+                onClick={() => setSignup(true)}
                 className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-80"
                 style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
               >
                 Prova gratis — 10 uppslag
-              </a>
+              </button>
               <a
                 href="mailto:hej@norric.io?subject=Demo%20request"
                 className="inline-flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-[0.25em] font-bold transition-opacity hover:opacity-70"
@@ -567,13 +567,13 @@ export default function App() {
           </div>
         </div>
         {/* gold 6 / 6 */}
-        <a
-          href="mailto:hej@norric.io?subject=Kreditvakt&body=Hej,%20jag%20vill%20veta%20mer."
+        <button
+          onClick={() => setSignup(true)}
           className="text-[10px] uppercase tracking-[0.2em] font-bold px-5 py-3 transition-opacity hover:opacity-80"
           style={{ background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px', fontFamily: 'var(--font-mono)' }}
         >
           Starta →
-        </a>
+        </button>
       </div>
     </div>
   );
