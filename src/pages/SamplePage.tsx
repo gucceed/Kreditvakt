@@ -4,24 +4,20 @@ const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 const serif: React.CSSProperties = { fontFamily: 'var(--font-serif)' };
 
 const DEBTS = [
-  { creditor: 'Skatteverket',         amount: '312 400 kr', type: 'Skatteskuld',          date: '2024-08-14' },
-  { creditor: 'Kronofogden',          amount: '187 200 kr', type: 'Utsökning',             date: '2024-09-01' },
-  { creditor: 'Swedbank Factoring',   amount: '98 750 kr',  type: 'Fordringsöverlåtelse',  date: '2024-07-22' },
-  { creditor: 'Transportstyrelsen',   amount: '44 600 kr',  type: 'Fordonsskuld',          date: '2024-10-03' },
-  { creditor: 'Arbetsgivaravgifter',  amount: '38 900 kr',  type: 'Sociala avgifter',       date: '2024-06-30' },
+  { creditor: 'Skatteverket',   amount: '87 400 kr',  type: 'Restanslängd',        date: '2024-09-12' },
+  { creditor: 'Kronofogden',    amount: '34 200 kr',  type: 'Betalningsföreläggande', date: '2024-10-28' },
 ];
 
 const EVENTS = [
-  { date: '2024-10-03', event: 'Ny skuld registrerad — Transportstyrelsen 44 600 kr' },
-  { date: '2024-09-01', event: 'Utsökningsmål öppnat — Kronofogden' },
-  { date: '2024-08-14', event: 'Skatteskuld eskalerad till Kronofogden' },
-  { date: '2024-07-22', event: 'Factoring-fordran överlåten — Swedbank' },
-  { date: '2024-03-15', event: 'Första skuldindikatorn registrerad' },
+  { date: '2024-10-28', event: 'Betalningsföreläggande registrerat — Kronofogden 34 200 kr' },
+  { date: '2024-09-12', event: 'Skatteskuld publicerad i restanslängd — 87 400 kr' },
+  { date: '2024-07-01', event: 'Årsredovisning 2023 inlämnad 47 dagar försenat' },
+  { date: '2024-03-20', event: 'F-skatt aktiv — inga avvikelser' },
 ];
 
 export default function SamplePage() {
-  const score = 16;
-  const scoreColor = '#EA580C';
+  const score = 10;
+  const scoreColor = '#F97316';
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)' }}>
@@ -60,14 +56,22 @@ export default function SamplePage() {
           </div>
           <div>
             <div style={{ ...mono, fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '0.75rem' }}>Risknivå</div>
-            <div style={{ ...serif, fontSize: '1.5rem', fontWeight: 700, color: scoreColor }}>Stoppa krediter</div>
-            <div style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Konkursfrekvens 20–35%</div>
+            <div style={{ ...serif, fontSize: '1.5rem', fontWeight: 700, color: scoreColor }}>Förhöjd risk</div>
+            <div style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Konkursfrekvens 5–12%</div>
           </div>
           <div>
-            <div style={{ ...mono, fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '0.75rem' }}>Total skuldbörda</div>
-            <div style={{ ...serif, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>681 850 kr</div>
-            <div style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.5rem' }}>5 fordringsägare</div>
+            <div style={{ ...mono, fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '0.75rem' }}>Registrerade skulder</div>
+            <div style={{ ...serif, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>121 600 kr</div>
+            <div style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', marginTop: '0.5rem' }}>2 fordringsägare</div>
           </div>
+        </div>
+
+        {/* Band action */}
+        <div style={{ border: '0.5px solid var(--border)', borderLeft: `2px solid ${scoreColor}`, borderRadius: '2px', padding: '1.25rem 1.5rem', marginBottom: '3rem' }}>
+          <div style={{ ...mono, fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '0.5rem' }}>Rekommenderad åtgärd</div>
+          <p style={{ ...mono, fontSize: '12px', color: 'var(--text-second)', lineHeight: 1.7 }}>
+            Begränsa nya kreditlinjer. Begär uppdaterade ekonomiska underlag.
+          </p>
         </div>
 
         {/* Score bar */}
@@ -78,7 +82,7 @@ export default function SamplePage() {
         {/* Debt table */}
         <div style={{ marginBottom: '3rem' }}>
           <p style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '1.5rem' }}>
-            Skuldinventering · Kronofogden
+            Skuldinventering · Kronofogden & Skatteverket
           </p>
           <div style={{ border: '0.5px solid var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', padding: '0.75rem 1.25rem', background: 'var(--bg-card)', borderBottom: '0.5px solid var(--border)' }}>
