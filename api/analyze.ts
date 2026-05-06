@@ -1,5 +1,23 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+const ALLOWED_ORIGIN = 'https://kreditvakt.com';
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 10;
+
+const ipWindows = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const window = ipWindows.get(ip);
+  if (!window || now >= window.resetAt) {
+    ipWindows.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (window.count >= RATE_LIMIT_MAX) return false;
+  window.count++;
+  return true;
+}
+
 const MODEL = 'claude-sonnet-4-6';
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MAX_RETRIES = 3;
@@ -183,8 +201,25 @@ async function analyzeWithRetry(query: string): Promise<object> {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const ip =
+    (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0].trim() ??
+    req.socket.remoteAddress ??
+    'unknown';
+
+  if (!checkRateLimit(ip)) {
+    return res.status(429).json({ error: 'För många förfrågningar. Försök igen om en stund.' });
   }
 
   const { query } = req.body ?? {};
