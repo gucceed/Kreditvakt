@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, ChevronRight, Lock, Check, Activity } from 'lucide-react';
 
@@ -9,7 +9,6 @@ interface AnalysisResult {
   industry: string;
   org_age_years: number;
   registered_year: number;
-  insolvency_score: number;
   verdict: string;
   f_skatt_active: boolean;
   // Source 1 — Skatteverket
@@ -36,8 +35,7 @@ interface AnalysisResult {
   // Summary
   signal_count: number;
   confidence: 'låg' | 'medel' | 'hög';
-  // Display score (0–20 scale). Falls back to insolvency_score conversion if absent.
-  display_score?: number;
+  display_score: number;
   band?: number;
   band_label?: string;
 }
@@ -50,8 +48,12 @@ export const Analysis = () => {
   const [slidePos, setSlidePos] = useState(0);
   const [approved, setApproved] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => { abortRef.current?.abort(); }, []);
 
   const runAnalysis = useCallback(async (targetQuery?: string) => {
+    if (loading) return;
     const raw = (targetQuery ?? orgnr).trim();
 
     if (!raw) {
@@ -66,6 +68,11 @@ export const Analysis = () => {
       ? digitsOnly.slice(0, 6) + '-' + digitsOnly.slice(6)
       : raw;
 
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     setOrgnr(query);
     setLoading(true);
     setError(null);
@@ -78,6 +85,7 @@ export const Analysis = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query }),
+        signal: controller.signal,
       });
 
       const data = await resp.json();
@@ -89,13 +97,18 @@ export const Analysis = () => {
       } else {
         setResult(data);
       }
-    } catch (err) {
-      console.error(err);
-      setError('Tillfälligt fel. Försök igen om en stund.');
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        setError('Analysen tog för lång tid. Försök igen.');
+      } else {
+        console.error(err);
+        setError('Tillfälligt fel. Försök igen om en stund.');
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
-  }, [orgnr]);
+  }, [loading, orgnr]);
 
   const handleSlide = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (approved) return;
@@ -234,10 +247,7 @@ export const Analysis = () => {
             <div className="bg-white/5 hairline-border rounded-[4px] overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-12 p-10 items-center border-b border-gold/10">
                 {(() => {
-                  const score = result.display_score ?? Math.round(result.insolvency_score / 5);
-                  // Defensive fallback only — canonical source is server. If band_label is ever
-                  // missing in production, that's an API bug to fix, not data to render.
-                  // Do not replace this fallback with an error state — note as future work.
+                  const score = result.display_score;
                   const label = result.band_label ?? (
                     score <= 4  ? 'Stabil' :
                     score <= 8  ? 'Bevaka' :
