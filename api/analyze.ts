@@ -1,21 +1,29 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 const ALLOWED_ORIGIN = 'https://kreditvakt.com';
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 10;
 
-const ipWindows = new Map<string, { count: number; resetAt: number }>();
+let ratelimit: Ratelimit | null = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  ratelimit = new Ratelimit({
+    redis: new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    }),
+    limiter: Ratelimit.slidingWindow(10, '1 m'),
+    prefix: 'kreditvakt:rl',
+  });
+}
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const window = ipWindows.get(ip);
-  if (!window || now >= window.resetAt) {
-    ipWindows.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
+async function checkRateLimit(ip: string): Promise<boolean> {
+  if (!ratelimit) return true;  // fail-open if Redis not configured
+  try {
+    const { success } = await ratelimit.limit(ip);
+    return success;
+  } catch {
+    return true;  // fail-open on Redis errors
   }
-  if (window.count >= RATE_LIMIT_MAX) return false;
-  window.count++;
-  return true;
 }
 
 const MODEL = 'claude-sonnet-4-6';
@@ -218,7 +226,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     req.socket.remoteAddress ??
     'unknown';
 
-  if (!checkRateLimit(ip)) {
+  if (!(await checkRateLimit(ip))) {
     return res.status(429).json({ error: 'För många förfrågningar. Försök igen om en stund.' });
   }
 
