@@ -4,12 +4,21 @@ import { Redis } from '@upstash/redis';
 
 const ALLOWED_ORIGIN = 'https://kreditvakt.com';
 
+const hasUpstash = !!process.env.UPSTASH_REDIS_REST_URL
+                && !!process.env.UPSTASH_REDIS_REST_TOKEN;
+if (!hasUpstash && process.env.NODE_ENV === 'production') {
+  throw new Error(
+    'Upstash credentials missing in production — refusing to start. ' +
+    'Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in Vercel.'
+  );
+}
+
 let ratelimit: Ratelimit | null = null;
-if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+if (hasUpstash) {
   ratelimit = new Ratelimit({
     redis: new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
     }),
     limiter: Ratelimit.slidingWindow(10, '1 m'),
     prefix: 'kreditvakt:rl',
@@ -17,12 +26,12 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 }
 
 async function checkRateLimit(ip: string): Promise<boolean> {
-  if (!ratelimit) return true;  // fail-open if Redis not configured
+  if (!ratelimit) return true;  // fail-open if Redis not configured (dev/test only)
   try {
     const { success } = await ratelimit.limit(ip);
     return success;
   } catch {
-    return true;  // fail-open on Redis errors
+    return true;  // fail-open on transient Redis errors
   }
 }
 
