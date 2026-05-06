@@ -32,14 +32,36 @@ const BAND_COLORS: Record<number, string> = {
   5: '#EF4444',
 };
 
-function formatOrgnr(raw: string): string {
+function luhnValid(digits: string): boolean {
+  let sum = 0;
+  let alt = false;
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let n = parseInt(digits[i], 10);
+    if (alt) { n *= 2; if (n > 9) n -= 9; }
+    sum += n;
+    alt = !alt;
+  }
+  return sum % 10 === 0;
+}
+
+function normalizeOrgnrDigits(raw: string): string | null {
   const digits = raw.replace(/\D/g, '');
-  if (digits.length === 10) return `${digits.slice(0, 6)}-${digits.slice(6)}`;
-  return digits;
+  if (digits.length === 12) return digits.slice(2);
+  if (digits.length === 10) return digits;
+  return null;
+}
+
+function formatOrgnr(raw: string): string {
+  const ten = normalizeOrgnrDigits(raw);
+  if (ten) return `${ten.slice(0, 6)}-${ten.slice(6)}`;
+  return raw.replace(/\D/g, '');
 }
 
 function isValidOrgnr(raw: string): boolean {
-  return /^\d{6}-?\d{4}$/.test(raw.trim()) || /^\d{10}$/.test(raw.trim());
+  const ten = normalizeOrgnrDigits(raw);
+  if (!ten) return false;
+  if (ten[0] === '0') return false;
+  return luhnValid(ten);
 }
 
 function lastFour(key: string): string {
@@ -117,7 +139,7 @@ export default function LookupPage() {
     setErrMsg('');
     setErrCode(null);
 
-    const cleanOrgnr = orgnr.replace(/\D/g, '');
+    const cleanOrgnr = normalizeOrgnrDigits(orgnr) ?? orgnr.replace(/\D/g, '');
 
     try {
       const res = await fetch(`${API}/api/score/${cleanOrgnr}`, {
