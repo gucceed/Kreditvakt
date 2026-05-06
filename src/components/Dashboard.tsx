@@ -3,9 +3,9 @@ import { motion } from 'motion/react';
 import { AlertCircle, Activity, ChevronRight } from 'lucide-react';
 
 const PENDING_ALERTS = [
-  { id: 1, type: 'Kritisk Signal', entity: 'Nordic Logistics AB', signal: 'Skatteverksrestans detekterad', score: 92 },
-  { id: 2, type: 'Hög Risk', entity: 'Svea Entreprenad HB', signal: 'F-skatt återkallad', score: 78 },
-  { id: 3, type: 'Trendanalys', entity: 'Västkustens Handel', signal: 'Ökande betalningsförelägganden', score: 54 },
+  { id: 1, type: 'Kritisk Signal', entity: 'Nordic Logistics AB', signal: 'Skatteverksrestans detekterad', score: 18 },
+  { id: 2, type: 'Hög Risk', entity: 'Svea Entreprenad HB', signal: 'F-skatt återkallad', score: 15 },
+  { id: 3, type: 'Trendanalys', entity: 'Västkustens Handel', signal: 'Ökande betalningsförelägganden', score: 11 },
 ];
 
 export const Dashboard = ({ onShowAnalysis }: { onShowAnalysis: () => void }) => {
@@ -95,7 +95,7 @@ export const Dashboard = ({ onShowAnalysis }: { onShowAnalysis: () => void }) =>
                 </div>
               </div>
               <div className="text-right">
-                <span className={`font-serif text-lg block mb-1 ${alert.score >= 90 ? 'text-red-500' : 'text-white'}`}>{alert.score}</span>
+                <span className={`font-serif text-lg block mb-1 ${alert.score >= 17 ? 'text-red-500' : 'text-white'}`}>{alert.score}/20</span>
                 <span className="text-[9px] uppercase tracking-widest text-gold-lite/30">Betyg</span>
               </div>
             </div>
