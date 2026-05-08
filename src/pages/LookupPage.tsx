@@ -32,18 +32,6 @@ const BAND_COLORS: Record<number, string> = {
   5: '#EF4444',
 };
 
-function luhnValid(digits: string): boolean {
-  let sum = 0;
-  let alt = false;
-  for (let i = digits.length - 1; i >= 0; i--) {
-    let n = parseInt(digits[i], 10);
-    if (alt) { n *= 2; if (n > 9) n -= 9; }
-    sum += n;
-    alt = !alt;
-  }
-  return sum % 10 === 0;
-}
-
 function normalizeOrgnrDigits(raw: string): string | null {
   const digits = raw.replace(/\D/g, '');
   if (digits.length === 12) return digits.slice(2);
@@ -60,8 +48,7 @@ function formatOrgnr(raw: string): string {
 function isValidOrgnr(raw: string): boolean {
   const ten = normalizeOrgnrDigits(raw);
   if (!ten) return false;
-  if (ten[0] === '0') return false;
-  return luhnValid(ten);
+  return ten[0] !== '0';
 }
 
 function lastFour(key: string): string {
@@ -326,7 +313,7 @@ export default function LookupPage() {
             </p>
             {errCode === 402 && (
               <a
-                href="mailto:hej@norric.io?subject=Silver-abonnemang%20Kreditvakt&body=Hej,%0A%0AJag%20vill%20teckna%20Silver-abonnemang%20(4%20900%20kr/mån).%0A%0AFöretag:%20%0AOrgnr:%20%0AKontaktperson:%20%0A"
+                href={`/onboarding?tier=silver${orgnr ? `&orgnr=${orgnr.replace(/\D/g, '')}` : ''}`}
                 style={{ ...mono, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700, color: 'var(--text-second)', textDecoration: 'none', borderBottom: '0.5px solid var(--border-h)', paddingBottom: '1px' }}
               >
                 Uppgradera till Silver →

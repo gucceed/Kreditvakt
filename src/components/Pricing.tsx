@@ -25,7 +25,7 @@ const TIERS: Tier[] = [
     features: ['500 uppslag/månad', 'Kreditriskvärdering', 'Riskvarningar'],
     cta: 'Starta abonnemang →',
     highlighted: false,
-    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Silver-abonnemang Kreditvakt', body: 'Hej,%0A%0AJag%20vill%20teckna%20Silver-abonnemang%20(4%20900%20kr/mån).%0A%0AFöretag:%20%0AOrgnr:%20%0AKontaktperson:%20%0A' },
+    action: { type: 'href', url: '/onboarding?tier=silver' },
   },
   {
     badge: 'Mest valda', name: 'Guld', price: '1 499 kr', period: '/månad',
@@ -34,7 +34,7 @@ const TIERS: Tier[] = [
     features: ['Obegränsade uppslag', 'Komplett skuldanalys', 'Fordringsägardetaljer', 'CSV-export'],
     cta: 'Starta abonnemang (årlig) →',
     highlighted: true,
-    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Guld-abonnemang Kreditvakt', body: 'Hej,%0A%0AJag%20vill%20teckna%20Guld-abonnemang%20(årlig%20fakturering).%0A%0AFöretag:%20%0AOrgnr:%20%0AKontaktperson:%20%0A' },
+    action: { type: 'href', url: '/onboarding?tier=guld' },
   },
   {
     badge: 'Avancerat', name: 'Premium', price: '4 999 kr', period: '/månad',
@@ -43,7 +43,7 @@ const TIERS: Tier[] = [
     features: ['Obegränsade uppslag', 'Allt i Guld', 'Dedikerad support', 'SLA-garanti', 'Full API-åtkomst'],
     cta: 'Boka introsamtal →',
     highlighted: false,
-    action: { type: 'mailto', address: 'hej@norric.io', subject: 'Premium-tier Kreditvakt', body: 'Hej,%0A%0AVi%20är%20intresserade%20av%20Compliance/Premium-tier.%0A%0AFöretag:%20%0AKontaktperson:%20%0AAnvändningsfall:%20%0A' },
+    action: { type: 'href', url: '/onboarding?tier=premium' },
   },
   {
     badge: 'Enterprise', name: 'Enterprise', price: 'Kontakta oss', period: '',

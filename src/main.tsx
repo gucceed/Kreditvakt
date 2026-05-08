@@ -7,6 +7,8 @@ import DocsPage from './pages/DocsPage.tsx';
 import SamplePage from './pages/SamplePage.tsx';
 import CheckoutPage from './pages/CheckoutPage.tsx';
 import LookupPage from './pages/LookupPage.tsx';
+import OnboardingPage from './pages/OnboardingPage.tsx';
+import WelcomePage from './pages/WelcomePage.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -21,6 +23,8 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/checkout/success" element={<CheckoutPage />} />
         <Route path="/pricing" element={<App />} />
         <Route path="/lookup" element={<LookupPage />} />
+        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/welcome" element={<WelcomePage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
