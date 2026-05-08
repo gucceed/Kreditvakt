@@ -110,9 +110,8 @@ export default function LookupPage() {
     setState('idle');
   }
 
-  const keyValid   = apiKey.trim().length > 0;
   const orgnrValid = isValidOrgnr(orgnr);
-  const canSearch  = keyValid && orgnrValid && state !== 'loading';
+  const canSearch  = orgnrValid && state !== 'loading';
 
   async function search(e: React.FormEvent) {
     e.preventDefault();
@@ -129,11 +128,9 @@ export default function LookupPage() {
     const cleanOrgnr = normalizeOrgnrDigits(orgnr) ?? orgnr.replace(/\D/g, '');
 
     try {
-      const res = await fetch(`${API}/api/score/${cleanOrgnr}`, {
-        headers: {
-          'Authorization': `Bearer ${apiKey.trim()}`,
-        },
-      });
+      const headers: Record<string, string> = {};
+      if (apiKey.trim()) headers['Authorization'] = `Bearer ${apiKey.trim()}`;
+      const res = await fetch(`${API}/api/score/${cleanOrgnr}`, { headers });
 
       const data = await res.json();
 
@@ -145,19 +142,27 @@ export default function LookupPage() {
 
       setErrCode(res.status);
 
+      // Server returns { error_code, message } or { detail: { error_code, message } }
+      const detail = data.detail ?? data;
+      const serverMsg: string | undefined =
+        typeof detail === 'object' ? detail.message : (typeof detail === 'string' ? detail : undefined);
+
       if (res.status === 401) {
-        setErrMsg('Ogiltig API-nyckel. Kontrollera att du kopierat hela nyckeln.');
+        setErrMsg(serverMsg ?? 'Ogiltig API-nyckel. Kontrollera att du kopierat hela nyckeln.');
       } else if (res.status === 402) {
-        const detail = data.detail || data;
-        setErrMsg(typeof detail === 'object' ? detail.message : 'Du har använt dina sökningar.');
+        setErrMsg(serverMsg ?? 'Du har använt dina sökningar. Uppgradera till Silver.');
       } else if (res.status === 400) {
-        setErrMsg('Ogiltigt organisationsnummer.');
+        setErrMsg(serverMsg ?? 'Ogiltigt organisationsnummer — ange 10 siffror (t.ex. 556123-4567).');
+      } else if (res.status === 503) {
+        setErrMsg(serverMsg ?? 'Sökmotorn är tillfälligt degraderad. Försök igen om 30 sekunder.');
+      } else if (res.status === 429) {
+        setErrMsg(serverMsg ?? 'För många förfrågningar. Vänta en minut och försök igen.');
       } else {
-        setErrMsg('Kreditvakt är tillfälligt otillgänglig. Försök igen om en stund.');
+        setErrMsg(serverMsg ?? 'Något gick fel. Försök igen om en stund eller mejla hej@norric.io.');
       }
       setState('error');
     } catch {
-      setErrMsg('Kreditvakt är tillfälligt otillgänglig. Kontrollera din anslutning.');
+      setErrMsg('Nätverksfel — kontrollera din anslutning och försök igen.');
       setState('error');
     }
   }
