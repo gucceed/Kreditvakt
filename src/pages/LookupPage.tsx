@@ -6,7 +6,31 @@ const API = 'https://norric-mcp-production.up.railway.app';
 const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 const serif: React.CSSProperties = { fontFamily: 'var(--font-serif)' };
 
-type LookupState = 'idle' | 'loading' | 'success' | 'error';
+// Curated fictional Swedish companies — the ONLY orgnrs that get synthetic
+// reports on the free tier. Everything else goes to the onboarding gate.
+// Orgnrs in the 5500000xxx range are clearly test allocations.
+const DEMO_ORGNRS = new Set([
+  '5500000001',
+  '5500000002',
+  '5500000003',
+  '5500000004',
+  '5500000005',
+  '5500000006',
+]);
+
+const DEMO_COMPANY_NAMES: Record<string, string> = {
+  '5500000001': 'Testbolaget Stockholm AB',
+  '5500000002': 'Demobolag Sverige AB',
+  '5500000003': 'Konkursfirman Avveckling AB',
+  '5500000004': 'Fiktivt Handels AB',
+  '5500000005': 'Exempelföretaget Norr AB',
+  '5500000006': 'Provobolaget Sverige AB',
+};
+
+// Formatted for display: "550 000-0001"
+const DEMO_HINT_ORGNR = '5500000001';
+
+type LookupState = 'idle' | 'loading' | 'success' | 'error' | 'gate';
 
 interface ScoreResult {
   orgnr: string;
@@ -77,6 +101,7 @@ export default function LookupPage() {
   const [orgnr, setOrgnr]     = useState('');
   const [state, setState]     = useState<LookupState>('idle');
   const [result, setResult]   = useState<ScoreResult | null>(null);
+  const [isDemo, setIsDemo]   = useState(false);
   const [errMsg, setErrMsg]   = useState('');
   const [errCode, setErrCode] = useState<number | null>(null);
 
@@ -125,10 +150,21 @@ export default function LookupPage() {
 
     setState('loading');
     setResult(null);
+    setIsDemo(false);
     setErrMsg('');
     setErrCode(null);
 
     const cleanOrgnr = normalizeOrgnrDigits(orgnr) ?? orgnr.replace(/\D/g, '');
+    const isFreeTier = !apiKey.trim();
+    const isDemoOrgnr = DEMO_ORGNRS.has(cleanOrgnr);
+
+    // Free-tier gate: real orgnr → block fabrication, show onboarding CTA
+    if (isFreeTier && !isDemoOrgnr) {
+      setState('gate');
+      return;
+    }
+
+    setIsDemo(isDemoOrgnr);
 
     try {
       const headers: Record<string, string> = {};
@@ -330,6 +366,63 @@ export default function LookupPage() {
           </button>
         </form>
 
+        {/* Gate: real orgnr on free tier */}
+        {state === 'gate' && (
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{
+              border: '0.5px solid var(--border)',
+              borderLeft: '2px solid var(--gold)',
+              borderRadius: '2px',
+              padding: '1.5rem',
+              marginBottom: '1.5rem',
+            }}>
+              <p style={{ ...mono, fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '0.5rem' }}>
+                Registrerat bolag
+              </p>
+              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
+                {formatOrgnr(orgnr)}
+              </p>
+              <p style={{ ...mono, fontSize: '11px', color: 'var(--text-second)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
+                Bolaget är registrerat. För riktig riskbedömning, skapa konto eller boka demo.
+              </p>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <a
+                  href={`/onboarding?tier=silver${orgnr ? `&orgnr=${(normalizeOrgnrDigits(orgnr) ?? orgnr.replace(/\D/g, ''))}` : ''}`}
+                  style={{
+                    ...mono, display: 'inline-block', fontSize: '10px', textTransform: 'uppercase',
+                    letterSpacing: '0.22em', fontWeight: 700, padding: '0.75rem 1.5rem',
+                    background: 'var(--gold)', color: 'var(--bg)', borderRadius: '2px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Skapa konto →
+                </a>
+                <a
+                  href="mailto:hej@norric.io?subject=Demo%20request"
+                  style={{
+                    ...mono, display: 'inline-block', fontSize: '10px', textTransform: 'uppercase',
+                    letterSpacing: '0.22em', fontWeight: 700, padding: '0.75rem 1.5rem',
+                    border: '0.5px solid var(--border-h)', color: 'var(--text-second)',
+                    borderRadius: '2px', textDecoration: 'none',
+                  }}
+                >
+                  Boka demo
+                </a>
+              </div>
+            </div>
+            <p style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', lineHeight: 1.8 }}>
+              Vill du se ett exempelrapport?{' '}
+              <button
+                type="button"
+                onClick={() => { setOrgnr(formatOrgnr(DEMO_HINT_ORGNR)); setState('idle'); }}
+                style={{ ...mono, background: 'none', border: 'none', padding: 0, fontSize: '10px', color: 'var(--text-second)', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Sök på {formatOrgnr(DEMO_HINT_ORGNR)}
+              </button>
+            </p>
+          </div>
+        )}
+
         {/* Error */}
         {state === 'error' && (
           <div style={{ marginBottom: '2rem' }}>
@@ -350,6 +443,21 @@ export default function LookupPage() {
         {/* Result */}
         {state === 'success' && result && (
           <div>
+            {/* Demo banner */}
+            {isDemo && (
+              <div style={{
+                border: '0.5px solid var(--gold)',
+                background: 'rgba(184, 134, 27, 0.06)',
+                borderRadius: '2px',
+                padding: '0.625rem 1rem',
+                marginBottom: '1.5rem',
+              }}>
+                <p style={{ ...mono, fontSize: '9px', color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.2em', margin: 0 }}>
+                  EXEMPELRAPPORT — fiktivt bolag, fiktiva data.
+                </p>
+              </div>
+            )}
+
             {/* Searches remaining */}
             {result.searches_remaining !== undefined && (
               <p style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)', marginBottom: '1.5rem', textAlign: 'right' }}>
@@ -366,7 +474,9 @@ export default function LookupPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                 <div>
                   <div style={{ ...serif, fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-                    {result.company_name || result.orgnr}
+                    {isDemo
+                      ? (DEMO_COMPANY_NAMES[normalizeOrgnrDigits(orgnr) ?? ''] ?? result.company_name ?? result.orgnr)
+                      : (result.company_name || result.orgnr)}
                   </div>
                   <div style={{ ...mono, fontSize: '10px', color: 'var(--text-muted)' }}>
                     org.nr {formatOrgnr(result.orgnr)}

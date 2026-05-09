@@ -27,6 +27,38 @@ if (hasUpstash) {
   });
 }
 
+// ── Demo allowlist ───────────────────────────────────────────────
+// Only these fictional orgnrs get synthetic Anthropic reports on the free tier.
+// Real orgnrs (anything not in this set) receive a "create account" gate response.
+const DEMO_ORGNRS = new Set([
+  '5500000001', // Testbolaget Stockholm AB
+  '5500000002', // Demobolag Sverige AB
+  '5500000003', // Konkursfirman Avveckling AB
+  '5500000004', // Fiktivt Handels AB
+  '5500000005', // Exempelföretaget Norr AB
+  '5500000006', // Provobolaget Sverige AB
+]);
+
+const DEMO_COMPANY_NAMES: Record<string, string> = {
+  '5500000001': 'Testbolaget Stockholm AB',
+  '5500000002': 'Demobolag Sverige AB',
+  '5500000003': 'Konkursfirman Avveckling AB',
+  '5500000004': 'Fiktivt Handels AB',
+  '5500000005': 'Exempelföretaget Norr AB',
+  '5500000006': 'Provobolaget Sverige AB',
+};
+
+function normalizeOrgnr(raw: string): string | null {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 12) return digits.slice(2);
+  if (digits.length === 10) return digits;
+  return null;
+}
+
+function isValidOrgnrFormat(digits: string): boolean {
+  return digits.length === 10 && digits[0] !== '0';
+}
+
 // ── Error taxonomy ───────────────────────────────────────────────
 const ERR = {
   RATE_LIMITED:          'RATE_LIMITED',
@@ -319,9 +351,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(status).json({ error_code: ERR.BAD_INPUT, error: message });
   }
 
+  // ── Orgnr gate: only demo allowlist gets synthetic reports ────
+  // Company name queries are blocked on the free tier to prevent
+  // fabricating credit risk data attached to real identifiable entities.
+  const normalized = normalizeOrgnr(query.trim());
+  if (!normalized || !isValidOrgnrFormat(normalized)) {
+    return res.status(400).json({
+      error_code: ERR.BAD_INPUT,
+      error: 'Ange ett giltigt organisationsnummer (10 siffror, t.ex. 556123-4567).',
+    });
+  }
+
+  if (!DEMO_ORGNRS.has(normalized)) {
+    // Real orgnr — return gate response without calling Anthropic
+    const formatted = `${normalized.slice(0, 6)}-${normalized.slice(6)}`;
+    return res.status(200).json({
+      is_real_company: true,
+      orgnr: formatted,
+      message: 'Bolaget är registrerat. För riktig riskbedömning, skapa konto eller boka demo.',
+      cta: 'onboarding',
+      cta_url: `/onboarding?tier=silver&orgnr=${normalized}`,
+    });
+  }
+
+  // Demo orgnr — call Anthropic for synthetic report
+  const companyName = DEMO_COMPANY_NAMES[normalized];
+  const demoQuery = `${normalized} (${companyName})`;
+
   try {
-    const result = await analyzeWithRetry(query.trim());
-    return res.status(200).json(result);
+    const result = await analyzeWithRetry(demoQuery);
+    return res.status(200).json({
+      ...result as object,
+      _demo: true,
+      _demo_label: 'EXEMPELRAPPORT — fiktivt bolag, fiktiva data.',
+      company_name: companyName,
+    });
   } catch (err: any) {
     const status = err.status ?? 0;
     const errCode: ErrCode = status >= 400 && status < 500
