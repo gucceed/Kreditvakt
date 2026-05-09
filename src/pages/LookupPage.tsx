@@ -25,11 +25,11 @@ interface ScoreResult {
 }
 
 const BAND_COLORS: Record<number, string> = {
-  1: '#10B981',
-  2: '#EAB308',
-  3: '#F97316',
-  4: '#EA580C',
-  5: '#EF4444',
+  1: '#2F6B3B',
+  2: '#B8861B',
+  3: '#B85019',
+  4: '#933419',
+  5: '#931E1E',
 };
 
 function normalizeOrgnrDigits(raw: string): string | null {
@@ -69,6 +69,7 @@ export default function LookupPage() {
 
   const [apiKey, setApiKey]               = useState('');
   const [keyLocked, setKeyLocked]         = useState(false);
+  const [showKeyField, setShowKeyField]   = useState(false);
   const [clipboardAvailable, setClipboard] = useState(
     typeof navigator !== 'undefined' && !!navigator?.clipboard?.readText,
   );
@@ -85,6 +86,7 @@ export default function LookupPage() {
     if (paramKey?.trim()) {
       setApiKey(paramKey.trim());
       setKeyLocked(true);
+      setShowKeyField(true);
     }
   }, []);
 
@@ -104,6 +106,7 @@ export default function LookupPage() {
   function unlockKey() {
     setApiKey('');
     setKeyLocked(false);
+    setShowKeyField(false);
     setResult(null);
     setErrMsg('');
     setErrCode(null);
@@ -197,61 +200,32 @@ export default function LookupPage() {
         {/* Form */}
         <form onSubmit={search} style={{ marginBottom: '2rem' }}>
 
-          {/* API key field */}
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ ...mono, display: 'block', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-              API-nyckel
-            </label>
+          {/* API key field — hidden for free-tier users */}
+          {showKeyField ? (
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ ...mono, display: 'block', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                API-nyckel
+              </label>
 
-            {keyLocked ? (
-              /* Masked / locked state */
-              <div>
-                <div style={{
-                  ...mono,
-                  padding: '0.75rem 1rem',
-                  border: '0.5px solid var(--border)',
-                  borderRadius: '2px',
-                  fontSize: '11px',
-                  color: 'var(--text-second)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}>
-                  <span style={{ color: '#10B981' }}>✓</span>
-                  Nyckel laddad (slutar på {lastFour(apiKey)})
-                </div>
-                <button
-                  type="button"
-                  onClick={unlockKey}
-                  style={{
+              {keyLocked ? (
+                <div>
+                  <div style={{
                     ...mono,
-                    background: 'none', border: 'none', padding: '0.35rem 0',
-                    fontSize: '10px', color: 'var(--text-muted)', cursor: 'pointer',
-                    textDecoration: 'underline', textUnderlineOffset: '2px',
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Byt nyckel
-                </button>
-              </div>
-            ) : (
-              /* Editable state */
-              <div>
-                <input
-                  type="text"
-                  value={apiKey}
-                  onChange={e => setApiKey(e.target.value)}
-                  placeholder="nrk_..."
-                  spellCheck={false}
-                  autoComplete="off"
-                  style={inputStyle}
-                  onFocus={e => (e.target.style.borderColor = 'var(--border-h)')}
-                  onBlur={e => (e.target.style.borderColor = 'var(--border)')}
-                />
-                {clipboardAvailable && (
+                    padding: '0.75rem 1rem',
+                    border: '0.5px solid var(--border)',
+                    borderRadius: '2px',
+                    fontSize: '11px',
+                    color: 'var(--text-second)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}>
+                    <span style={{ color: '#2F6B3B' }}>✓</span>
+                    Nyckel laddad (slutar på {lastFour(apiKey)})
+                  </div>
                   <button
                     type="button"
-                    onClick={pasteFromClipboard}
+                    onClick={unlockKey}
                     style={{
                       ...mono,
                       background: 'none', border: 'none', padding: '0.35rem 0',
@@ -260,12 +234,58 @@ export default function LookupPage() {
                       letterSpacing: '0.05em',
                     }}
                   >
-                    Klistra in från urklipp
+                    Byt nyckel
                   </button>
-                )}
-              </div>
-            )}
-          </div>
+                </div>
+              ) : (
+                <div>
+                  <input
+                    type="text"
+                    value={apiKey}
+                    onChange={e => setApiKey(e.target.value)}
+                    placeholder="nrk_..."
+                    spellCheck={false}
+                    autoComplete="off"
+                    style={inputStyle}
+                    onFocus={e => (e.target.style.borderColor = 'var(--border-h)')}
+                    onBlur={e => (e.target.style.borderColor = 'var(--border)')}
+                  />
+                  {clipboardAvailable && (
+                    <button
+                      type="button"
+                      onClick={pasteFromClipboard}
+                      style={{
+                        ...mono,
+                        background: 'none', border: 'none', padding: '0.35rem 0',
+                        fontSize: '10px', color: 'var(--text-muted)', cursor: 'pointer',
+                        textDecoration: 'underline', textUnderlineOffset: '2px',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      Klistra in från urklipp
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ marginBottom: '1.25rem' }}>
+              <p style={{ ...mono, fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.7 }}>
+                Sökning sker anonymt på fri nivå.{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowKeyField(true)}
+                  style={{
+                    ...mono, background: 'none', border: 'none', padding: 0,
+                    fontSize: '11px', color: 'var(--text-second)', cursor: 'pointer',
+                    textDecoration: 'underline', textUnderlineOffset: '2px',
+                  }}
+                >
+                  Jag har en API-nyckel
+                </button>
+              </p>
+            </div>
+          )}
 
           {/* Orgnr */}
           <div style={{ marginBottom: '1.5rem' }}>

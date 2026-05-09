@@ -21,8 +21,8 @@ const TIER_DATA: Record<string, { label: string; price: string; features: string
 const MOCK_REPORT = {
   name: 'Exempelföretaget AB',
   orgnr: '556000-3744',
-  score: 72,
-  risk_label: 'Stable',
+  score: 3,
+  risk_label: 'Stabil',
   risk_level: 1,
   summary: 'Inga aktiva betalningsanmärkningar. Stabil skuldsättningsgrad de senaste 12 månaderna. Bolaget visar god likviditet.',
   creditors: [
@@ -31,7 +31,7 @@ const MOCK_REPORT = {
   ],
 };
 
-const RISK_COLOR: Record<number, string> = { 1: '#10B981', 2: '#EAB308', 3: '#F97316', 4: '#EA580C', 5: '#EF4444' };
+const RISK_COLOR: Record<number, string> = { 1: '#2F6B3B', 2: '#B8861B', 3: '#B85019', 4: '#933419', 5: '#931E1E' };
 
 const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
 const serif: React.CSSProperties = { fontFamily: 'var(--font-serif)' };
@@ -110,7 +110,7 @@ function Step1Demo({ onNext }: { onNext: () => void }) {
             <p style={{ ...mono, fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '4px' }}>
               Riskindex
             </p>
-            <p style={{ ...mono, fontSize: '2rem', fontWeight: 700, color }}>{r.score}</p>
+            <p style={{ ...mono, fontSize: '2rem', fontWeight: 700, color }}>{r.score}<span style={{ fontSize: '1rem', opacity: 0.5 }}>/20</span></p>
             <span style={{
               ...mono, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.15em',
               color, border: `0.5px solid ${color}`, borderRadius: '2px', padding: '2px 8px',

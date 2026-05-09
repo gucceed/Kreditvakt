@@ -13,17 +13,17 @@ const ShieldMark = ({ size = 16, style }: { size?: number; style?: React.CSSProp
 
 /* ── Static data ───────────────────────────────────────────── */
 const SCORE_BANDS = [
-  { range: '0 – 4',   label: 'Stabil',       color: '#10B981', pct: '< 1%',   desc: 'Inga signifikanta skuldindikationer' },
-  { range: '5 – 8',   label: 'Bevaka',        color: '#EAB308', pct: '2–5%',   desc: 'Måttliga skuldsignaler — bevaka aktivt' },
-  { range: '9 – 12',  label: 'Förhöjd risk',  color: '#F97316', pct: '8–15%',  desc: 'Tydliga skuldmönster — agera proaktivt' },
-  { range: '13 – 16', label: 'Hög risk',      color: '#EA580C', pct: '20–35%', desc: 'Allvarliga betalningsproblem registrerade' },
-  { range: '17 – 20', label: 'Kritisk',       color: '#EF4444', pct: '> 50%',  desc: 'Imminent konkursrisk — omedelbar åtgärd' },
+  { range: '0 – 4',   label: 'Stabil',       color: '#2F6B3B', pct: '< 1%',   desc: 'Inga signifikanta skuldindikationer' },
+  { range: '5 – 8',   label: 'Bevaka',        color: '#B8861B', pct: '2–5%',   desc: 'Måttliga skuldsignaler — bevaka aktivt' },
+  { range: '9 – 12',  label: 'Förhöjd risk',  color: '#B85019', pct: '8–15%',  desc: 'Tydliga skuldmönster — agera proaktivt' },
+  { range: '13 – 16', label: 'Hög risk',      color: '#933419', pct: '20–35%', desc: 'Allvarliga betalningsproblem registrerade' },
+  { range: '17 – 20', label: 'Kritisk',       color: '#931E1E', pct: '> 50%',  desc: 'Imminent konkursrisk — omedelbar åtgärd' },
 ];
 
 const DEMO_COMPANIES = [
-  { name: 'Exemplet Bygg AB',   org_nr: '556 677-8899', score: 3,  label: 'Stabil',       color: '#10B981' },
-  { name: 'Nordisk Handel AB',  org_nr: '556 788-9900', score: 10, label: 'Förhöjd risk', color: '#F97316' },
-  { name: 'Fastighets AB Alfa', org_nr: '556 899-0011', score: 16, label: 'Hög risk',     color: '#EA580C' },
+  { name: 'Exemplet Bygg AB',   org_nr: '556 677-8899', score: 3,  label: 'Stabil',       color: '#2F6B3B' },
+  { name: 'Nordisk Handel AB',  org_nr: '556 788-9900', score: 10, label: 'Förhöjd risk', color: '#B85019' },
+  { name: 'Fastighets AB Alfa', org_nr: '556 899-0011', score: 16, label: 'Hög risk',     color: '#933419' },
 ];
 
 const PAIN_POINTS = [
@@ -61,7 +61,6 @@ function ScoreBar({ score, color }: { score: number; color: string }) {
 
 /* ── App ───────────────────────────────────────────────────── */
 export default function App() {
-  const [light, setLight]     = useState(false);
   const [menuOpen, setMenu]   = useState(false);
   const [demoIdx, setDemo]    = useState(0);
   const [showSignup, setSignup] = useState(false);
@@ -70,10 +69,7 @@ export default function App() {
   const demo = DEMO_COMPANIES[demoIdx];
 
   return (
-    <div
-      className={light ? 'light' : ''}
-      style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)', transition: 'background 0.3s ease' }}
-    >
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)' }}>
       {showSignup && <SignupModal onClose={() => setSignup(false)} />}
 
       {/* ── Beta banner ─────────────────────────────────────── */}
@@ -122,14 +118,6 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => setLight(l => !l)}
-            aria-label="Byt tema"
-            className="transition-opacity hover:opacity-60"
-            style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: 1 }}
-          >
-            {light ? '◑' : '◐'}
-          </button>
           {/* gold 2 / 6 */}
           <a
             href="/signup"
@@ -565,8 +553,6 @@ export default function App() {
         style={{
           background: 'var(--nav-bg)',
           borderTop: '0.5px solid var(--border)',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
         }}
       >
         <div>

@@ -14,31 +14,86 @@ if (!hasUpstash && process.env.NODE_ENV === 'production') {
 }
 
 let ratelimit: Ratelimit | null = null;
+let redis: Redis | null = null;
 if (hasUpstash) {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  });
   ratelimit = new Ratelimit({
-    redis: new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL!,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-    }),
+    redis,
     limiter: Ratelimit.slidingWindow(10, '1 m'),
     prefix: 'kreditvakt:rl',
   });
 }
 
+// ── Error taxonomy ───────────────────────────────────────────────
+const ERR = {
+  RATE_LIMITED:          'RATE_LIMITED',
+  ANTHROPIC_RATE_LIMIT:  'ANTHROPIC_RATE_LIMIT',
+  ANTHROPIC_AUTH:        'ANTHROPIC_AUTH',
+  ANTHROPIC_UNAVAILABLE: 'ANTHROPIC_UNAVAILABLE',
+  BAD_INPUT:             'BAD_INPUT',
+  CIRCUIT_OPEN:          'CIRCUIT_OPEN',
+  INTERNAL:              'INTERNAL',
+} as const;
+type ErrCode = typeof ERR[keyof typeof ERR];
+
+const ERR_RESPONSE: Record<ErrCode, { status: number; message: string }> = {
+  RATE_LIMITED:          { status: 429, message: 'För många förfrågningar. Försök igen om en minut.' },
+  ANTHROPIC_RATE_LIMIT:  { status: 429, message: 'Sökmotorn är belastad. Försök igen om 30 sekunder.' },
+  ANTHROPIC_AUTH:        { status: 503, message: 'Sökmotorn är felkonfigurerad. Kontakta hej@norric.io.' },
+  ANTHROPIC_UNAVAILABLE: { status: 503, message: 'Sökmotorn är tillfälligt otillgänglig. Försök igen om en stund.' },
+  BAD_INPUT:             { status: 400, message: 'Ogiltig indata — ange ett organisationsnummer eller företagsnamn.' },
+  CIRCUIT_OPEN:          { status: 503, message: 'Sökmotorn är tillfälligt begränsad. Försök igen om 2 minuter.' },
+  INTERNAL:              { status: 500, message: 'Tillfälligt fel. Försök igen om en stund.' },
+};
+
+// ── Circuit breaker (Redis-backed) ───────────────────────────────
+const CB_KEY = 'kreditvakt:cb:failures';
+const CB_THRESHOLD = 5;
+const CB_WINDOW_SECS = 120;
+
+async function isCircuitOpen(): Promise<boolean> {
+  if (!redis) return false;
+  try {
+    const failures = await redis.get<number>(CB_KEY) ?? 0;
+    return failures >= CB_THRESHOLD;
+  } catch {
+    return false;
+  }
+}
+
+async function recordFailure(status: number): Promise<void> {
+  if (!redis) return;
+  if (status !== 429 && status < 500) return;
+  try {
+    const current = await redis.incr(CB_KEY);
+    if (current === 1) await redis.expire(CB_KEY, CB_WINDOW_SECS);
+  } catch { /* ignore */ }
+}
+
+async function recordSuccess(): Promise<void> {
+  if (!redis) return;
+  try { await redis.del(CB_KEY); } catch { /* ignore */ }
+}
+
+// ── Rate limiter ─────────────────────────────────────────────────
 async function checkRateLimit(ip: string): Promise<boolean> {
-  if (!ratelimit) return true;  // fail-open if Redis not configured (dev/test only)
+  if (!ratelimit) return true;
   try {
     const { success } = await ratelimit.limit(ip);
     return success;
   } catch {
-    return true;  // fail-open on transient Redis errors
+    return true;
   }
 }
 
+// ── Anthropic ────────────────────────────────────────────────────
 const MODEL = 'claude-sonnet-4-6';
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
+const BASE_RETRY_MS = 1000;
 
 const SYSTEM_PROMPT = `Du är Kreditvakts signalmotor — ett professionellt insolvensanalysverktyg för svenska företag. Givet ett organisationsnummer ELLER ett företagsnamn, returnera ett realistiskt och välkalibrerat insolvensanalyssvar som JSON.
 
@@ -121,8 +176,25 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function retryDelay(attempt: number, status?: number): number {
+  if (status === 429) return Math.min(BASE_RETRY_MS * Math.pow(2, attempt - 1), 8000);
+  return BASE_RETRY_MS;
+}
+
+function shouldRetry(err: any, attempt: number): boolean {
+  if (attempt >= MAX_RETRIES) return false;
+  if (!err.status) return true;  // network error
+  if (err.status === 429) return true;  // Anthropic rate limit — retry with backoff
+  return err.status >= 500;
+}
+
+function classifyAnthropicError(status: number): ErrCode {
+  if (status === 429) return ERR.ANTHROPIC_RATE_LIMIT;
+  if (status === 401 || status === 403) return ERR.ANTHROPIC_AUTH;
+  return ERR.ANTHROPIC_UNAVAILABLE;
+}
+
 function extractJson(text: string): string {
-  // Find first { and last } — strip anything outside
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
   if (start === -1 || end === -1 || end < start) {
@@ -134,7 +206,9 @@ function extractJson(text: string): string {
 async function callClaude(query: string, extraInstruction = ''): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY not configured');
+    const err = new Error('ANTHROPIC_API_KEY not configured');
+    (err as any).status = 401;
+    throw err;
   }
 
   const userMessage = extraInstruction
@@ -167,13 +241,6 @@ async function callClaude(query: string, extraInstruction = ''): Promise<string>
   return data.content?.[0]?.text ?? '';
 }
 
-function shouldRetry(err: any, attempt: number): boolean {
-  if (attempt >= MAX_RETRIES) return false;
-  // Retry on network errors or 5xx
-  if (!err.status) return true;  // network-level error
-  return err.status >= 500;
-}
-
 async function analyzeWithRetry(query: string): Promise<object> {
   let lastError: any;
 
@@ -181,13 +248,11 @@ async function analyzeWithRetry(query: string): Promise<object> {
     try {
       const rawText = await callClaude(query);
 
-      // Fix D — JSON parse resilience
       let parsed: object;
       try {
         const jsonStr = extractJson(rawText);
         parsed = JSON.parse(jsonStr);
       } catch {
-        // Parse failed — retry with an explicit JSON instruction
         if (attempt < MAX_RETRIES) {
           const retryText = await callClaude(
             query,
@@ -206,11 +271,13 @@ async function analyzeWithRetry(query: string): Promise<object> {
         throw new Error(`display_score out of range: ${s}`);
       }
 
+      await recordSuccess();
       return parsed;
     } catch (err: any) {
       lastError = err;
+      await recordFailure(err.status ?? 0);
       if (!shouldRetry(err, attempt)) break;
-      await sleep(RETRY_DELAY_MS);
+      await sleep(retryDelay(attempt, err.status));
     }
   }
 
@@ -236,21 +303,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     'unknown';
 
   if (!(await checkRateLimit(ip))) {
-    return res.status(429).json({ error: 'För många förfrågningar. Försök igen om en stund.' });
+    const { status, message } = ERR_RESPONSE[ERR.RATE_LIMITED];
+    return res.status(status).json({ error_code: ERR.RATE_LIMITED, error: message });
+  }
+
+  if (await isCircuitOpen()) {
+    console.error(JSON.stringify({ event: 'circuit_open', ip, ts: new Date().toISOString() }));
+    const { status, message } = ERR_RESPONSE[ERR.CIRCUIT_OPEN];
+    return res.status(status).json({ error_code: ERR.CIRCUIT_OPEN, error: message });
   }
 
   const { query } = req.body ?? {};
-  if (!query || typeof query !== 'string') {
-    return res.status(400).json({ error: 'query is required' });
+  if (!query || typeof query !== 'string' || !query.trim()) {
+    const { status, message } = ERR_RESPONSE[ERR.BAD_INPUT];
+    return res.status(status).json({ error_code: ERR.BAD_INPUT, error: message });
   }
 
   try {
     const result = await analyzeWithRetry(query.trim());
     return res.status(200).json(result);
   } catch (err: any) {
-    console.error('analyze error:', err);
-    return res.status(500).json({
-      error: 'Tillfälligt fel. Försök igen om en stund.',
-    });
+    const status = err.status ?? 0;
+    const errCode: ErrCode = status >= 400 && status < 500
+      ? classifyAnthropicError(status)
+      : ERR.INTERNAL;
+
+    console.error(JSON.stringify({
+      event: 'analyze_error',
+      error_code: errCode,
+      http_status: status,
+      message: err.message,
+      ts: new Date().toISOString(),
+    }));
+
+    const resp = ERR_RESPONSE[errCode];
+    return res.status(resp.status).json({ error_code: errCode, error: resp.message });
   }
 }
