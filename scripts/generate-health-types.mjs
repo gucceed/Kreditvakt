@@ -16,7 +16,7 @@ import { jsonSchemaToZod } from "json-schema-to-zod";
 
 const REPO_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const OUT_DIR = join(REPO_ROOT, "src", "generated");
-const SOURCE_TAG = "observability-v1.0.0-spec";
+const SOURCE_TAG = "observability-v1.1.0-spec";
 const SCHEMA_URL =
   `https://raw.githubusercontent.com/gucceed/norric-shared/${SOURCE_TAG}/schemas/health-response.v1.json`;
 
